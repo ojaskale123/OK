@@ -1,0 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Dark Theme Colors */
+  --bg-color: #0a0a0f;
+  --surface-color-1: rgba(20, 20, 28, 0.6);
+  --surface-color-2: rgba(30, 30, 40, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.1);
+
+  /* Accents */
+  --neon-blue: #3b82f6;
+  --neon-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+
+  /* Status Colors (Green for positive, Red for negative) */
+  --ok-green: #10b981;
+  --ok-green-glow: rgba(16, 185, 129, 0.2);
+  --ok-red: #ef4444;
+  --ok-red-glow: rgba(239, 68, 68, 0.2);
+
+  /* Dimensions */
+  --sidebar-width: 260px;
+  --topbar-height: 70px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Outfit', sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: var(--surface-color-1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: var(--sidebar-width);
+}
+
+.page-wrapper {
+  padding: 2rem;
+  flex: 1;
+}
+
+/* Typography & General */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.text-gradient {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface-color-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-green {
+  background: var(--ok-green);
+  color: white;
+  box-shadow: 0 4px 14px var(--ok-green-glow);
+}
+
+.btn-green:hover {
+  box-shadow: 0 6px 20px var(--ok-green-glow);
+}
+
+.btn-red {
+  background: var(--ok-red);
+  color: white;
+  box-shadow: 0 4px 14px var(--ok-red-glow);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.form-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Amounts */
+.amount-receive {
+  color: var(--ok-green);
+  font-weight: 600;
+}
+
+.amount-give {
+  color: var(--ok-red);
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  :root {
+    --sidebar-width: 100%;
+  }
+}

@@ -1,0 +1,144 @@
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { TrendingUp, Package, Users, Wallet, Crown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const Dashboard = () => {
+  const { user } = useAuth();
+  const [activeCard, setActiveCard] = useState(null);
+  
+  const plan = user?.subscription?.plan || 'None';
+  const isActive = user?.subscription?.isActive;
+
+  if(!isActive || plan === 'None') {
+      return (
+          <div className="glass-card" style={{textAlign: 'center', padding: '4rem 2rem'}}>
+             <Crown size={64} color="var(--neon-purple)" style={{marginBottom: '1rem'}}/>
+             <h2>Your Subscription is Inactive</h2>
+             <p className="text-secondary" style={{margin: '1rem 0 2rem'}}>Please upgrade to a plan to unlock the Dashboard capabilities.</p>
+             <Link to="/plans" className="btn btn-primary">View Pricing Plans</Link>
+          </div>
+      );
+  }
+
+  const toggleCard = (card) => {
+      setActiveCard(activeCard === card ? null : card);
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h2 className="text-gradient">Business Overview</h2>
+        <div className="glass-card" style={{ padding: '0.5rem 1rem', display: 'flex', gap: '1rem' }}>
+            <div><span style={{color: 'var(--ok-green)'}}>Plan:</span> {plan}</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        {/* Sales Card */}
+        <div className="glass-card" style={{ cursor: 'pointer', outline: activeCard === 'sales' ? '2px solid var(--neon-blue)' : 'none' }} onClick={() => toggleCard('sales')}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}>
+                <span className="text-secondary">Today's Sales</span>
+                <TrendingUp color="var(--neon-blue)" />
+            </div>
+            <h3>₹14,500</h3>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <p className="amount-receive" style={{fontSize: '0.85rem'}}>+12% from yesterday</p>
+                {activeCard === 'sales' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {activeCard === 'sales' && (
+                <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
+                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Top Items Sold Today:</p>
+                    <ul style={{listStyle: 'none', fontSize: '0.9rem'}}>
+                        <li>1. Premium Rice (50kg)</li>
+                        <li>2. Wheat Flour (10kg)</li>
+                        <li>3. Cooking Oil (5L)</li>
+                    </ul>
+                </div>
+            )}
+        </div>
+
+        {/* Stock Card */}
+        <div className="glass-card" style={{ cursor: 'pointer', outline: activeCard === 'stock' ? '2px solid var(--ok-red)' : 'none' }} onClick={() => toggleCard('stock')}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}>
+                <span className="text-secondary">Low Stock Items</span>
+                <Package color="var(--ok-red)" />
+            </div>
+            <h3>24</h3>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <p className="amount-give" style={{fontSize: '0.85rem'}}>Requires action</p>
+                {activeCard === 'stock' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {activeCard === 'stock' && (
+                <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
+                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Critically Low:</p>
+                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--ok-red)'}}>
+                        <li>• Sugar Packets (2 left)</li>
+                        <li>• Salt 1kg (5 left)</li>
+                    </ul>
+                    <Link to="/inventory" className="text-gradient" style={{display: 'inline-block', marginTop: '0.5rem', fontSize: '0.85rem'}}>Manage Inventory ➔</Link>
+                </div>
+            )}
+        </div>
+
+        {/* Cashbook Card */}
+        <div className="glass-card" style={{ cursor: 'pointer', outline: activeCard === 'cashbook' ? '2px solid var(--neon-purple)' : 'none' }} onClick={() => toggleCard('cashbook')}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}>
+                <span className="text-secondary">Net Cashbook</span>
+                <Users color="var(--neon-purple)" />
+            </div>
+            <h3 className="amount-receive">₹+45,000</h3>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>Owed to you overall</p>
+                {activeCard === 'cashbook' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {activeCard === 'cashbook' && (
+                <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
+                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Biggest Debtor:</p>
+                    <p style={{fontSize: '0.9rem'}}>Ramesh Shop: <span className="amount-receive">₹12,000</span></p>
+                    <Link to="/cashbook" className="text-gradient" style={{display: 'inline-block', marginTop: '0.5rem', fontSize: '0.85rem'}}>Open Ledger ➔</Link>
+                </div>
+            )}
+        </div>
+
+        {/* Wallet Card */}
+        <div className="glass-card" style={{ cursor: 'pointer', outline: activeCard === 'wallet' ? '2px solid #fbbf24' : 'none' }} onClick={() => toggleCard('wallet')}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}>
+                <span className="text-secondary">Gamification Wallet</span>
+                <Wallet color="#fbbf24" />
+            </div>
+            <h3 style={{color: '#fbbf24'}}>{user?.walletBalance || 0} Credits</h3>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <p className="amount-receive" style={{fontSize: '0.85rem'}}>Can be used for discounts</p>
+                {activeCard === 'wallet' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {activeCard === 'wallet' && (
+                <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
+                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>How to earn more:</p>
+                    <p style={{fontSize: '0.9rem'}}>- Process POS Bills (+5)</p>
+                    <p style={{fontSize: '0.9rem'}}>- Refer Friends (+500)</p>
+                    <p style={{fontSize: '0.9rem'}}>- Daily Scratch Card</p>
+                    <Link to="/rewards" style={{display: 'inline-block', marginTop: '0.5rem', color: '#fbbf24', fontSize: '0.85rem'}}>Go to Rewards Hub ➔</Link>
+                </div>
+            )}
+        </div>
+      </div>
+
+      <div className="glass-card">
+         <h3 style={{marginBottom: '1rem'}}>Recent Platform Activity</h3>
+         <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+             <div style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between'}}>
+                 <span>System Check completed</span>
+                 <span className="text-secondary">10 mins ago</span>
+             </div>
+             <div style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between'}}>
+                 <span>New trial activated on master account</span>
+                 <span className="text-secondary">2 hours ago</span>
+             </div>
+         </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

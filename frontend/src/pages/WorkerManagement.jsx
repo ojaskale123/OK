@@ -1,0 +1,113 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { UserPlus, Users } from 'lucide-react';
+
+const WorkerManagement = () => {
+  const { token } = useAuth();
+  const [workers, setWorkers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+
+  const fetchWorkers = async () => {
+      try {
+          const res = await fetch('http://localhost:5000/api/workers', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if(res.ok) {
+              const data = await res.json();
+              setWorkers(data);
+          }
+      } catch (err) {
+          console.error(err);
+      }
+  };
+
+  useEffect(() => {
+      fetchWorkers();
+  }, [token]);
+
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      try {
+          const res = await fetch('http://localhost:5000/api/workers', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify(formData)
+          });
+          
+          if(res.ok) {
+              alert('Worker created successfully!');
+              setFormData({ name: '', email: '', password: '' });
+              fetchWorkers();
+          } else {
+              const errorData = await res.json();
+              alert(errorData.message || 'Failed to create worker');
+          }
+      } catch (err) {
+          console.error(err);
+      }
+      setLoading(false);
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 className="text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Users size={28} /> Workers & Staff
+            </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+            {/* Create Worker Form */}
+            <div className="glass-card">
+                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <UserPlus size={20} color="var(--neon-blue)" /> Add New Worker
+                </h3>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                        <label className="text-secondary" style={{ fontSize: '0.8rem' }}>Full Name</label>
+                        <input type="text" className="neon-input" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Worker Name" />
+                    </div>
+                    <div>
+                        <label className="text-secondary" style={{ fontSize: '0.8rem' }}>Login Email</label>
+                        <input type="email" className="neon-input" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="worker@shop.com" />
+                    </div>
+                    <div>
+                        <label className="text-secondary" style={{ fontSize: '0.8rem' }}>Temporary Password</label>
+                        <input type="password" className="neon-input" required value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="••••••" />
+                    </div>
+                    <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: '0.5rem' }}>
+                        {loading ? 'Creating...' : 'Create Worker Account'}
+                    </button>
+                </form>
+            </div>
+
+            {/* List Workers */}
+            <div className="glass-card">
+                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Users size={20} color="var(--neon-purple)" /> Existing Staff
+                </h3>
+                {workers.length === 0 ? (
+                    <p className="text-secondary" style={{ textAlign: 'center', padding: '2rem' }}>No workers added yet.</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {workers.map(worker => (
+                            <div key={worker._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{worker.name}</div>
+                                    <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{worker.email}</div>
+                                </div>
+                                <div style={{ background: 'rgba(0, 240, 255, 0.1)', color: 'var(--neon-blue)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem' }}>
+                                    Active
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+  );
+};
+export default WorkerManagement;

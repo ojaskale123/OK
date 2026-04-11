@@ -1,0 +1,74 @@
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--topbar-height);
+  padding: 0 2rem;
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.greeting {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--ok-red);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  height: 16px;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.user-profile {
+  cursor: pointer;
+}
+
+.avatar {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
+}

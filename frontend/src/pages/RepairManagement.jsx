@@ -1,0 +1,211 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Zap, Plus, Phone, Send, User } from 'lucide-react';
+
+const RepairManagement = () => {
+  const { token, user } = useAuth();
+  const [jobs, setJobs] = useState([]);
+  const [workers, setWorkers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  
+  const [formData, setFormData] = useState({
+      customerName: '', customerPhone: '', deviceModel: '', issue: '', workerId: ''
+  });
+
+  const isWorker = user?.role === 'worker';
+
+  const fetchJobs = async () => {
+      try {
+          const res = await fetch('http://localhost:5000/api/repairs', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if(res.ok) setJobs(await res.json());
+      } catch (err) { console.error(err); }
+  };
+
+  const fetchWorkers = async () => {
+      if(isWorker) return;
+      try {
+          const res = await fetch('http://localhost:5000/api/workers', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if(res.ok) setWorkers(await res.json());
+      } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => {
+      fetchJobs();
+      fetchWorkers();
+  }, [token]);
+
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      try {
+          const res = await fetch('http://localhost:5000/api/repairs', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify(formData)
+          });
+          if(res.ok) {
+              alert('Repair Job Added!');
+              setShowModal(false);
+              setFormData({ customerName: '', customerPhone: '', deviceModel: '', issue: '', workerId: '' });
+              fetchJobs();
+          } else {
+              const errData = await res.json();
+              alert(errData.message || 'Failed to create job');
+          }
+      } catch (err) { console.error(err); }
+      setLoading(false);
+  };
+
+  const updateJob = async (id, updates) => {
+      try {
+          const res = await fetch(`http://localhost:5000/api/repairs/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify(updates)
+          });
+          if(res.ok) fetchJobs();
+      } catch (err) { console.error(err); }
+  };
+
+  const getStatusColor = (status) => {
+      switch(status) {
+          case 'Collected': return 'var(--text-secondary)';
+          case 'Assigned': return 'var(--neon-purple)';
+          case 'In Repair': return 'var(--neon-blue)';
+          case 'Ready': return 'var(--ok-green)';
+          case 'Completed': return 'var(--text-secondary)';
+          default: return 'white';
+      }
+  };
+
+  const sendWhatsAppUpdate = (job) => {
+      let text = '';
+      if(job.status === 'Collected') {
+          text = `Hello ${job.customerName}, your device ${job.deviceModel} has been collected for repair. We will update you shortly.`;
+      } else if (job.status === 'Ready') {
+          text = `Hello ${job.customerName}, your device ${job.deviceModel} is ready! Total cost is ₹${job.costing || 0}. Please pick it up safely.`;
+      } else {
+          text = `Hello ${job.customerName}, an update on your device ${job.deviceModel}: the status is now ${job.status}.`;
+      }
+      
+      const url = `https://wa.me/91${job.customerPhone}?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 className="text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Zap size={28} /> Device Repairs
+            </h2>
+            <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Plus size={18} /> New Repair Job
+            </button>
+        </div>
+
+        {showModal && (
+            <div className="modal-overlay" style={{position: 'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.7)', zIndex: 1000, display:'flex', justifyContent:'center', alignItems:'center'}}>
+                <div className="glass-card" style={{ width: '400px', position: 'relative' }}>
+                    <button onClick={() => setShowModal(false)} style={{position: 'absolute', top: '10px', right: '15px', background:'none', border:'none', color:'white', fontSize:'1.5rem', cursor:'pointer'}}>&times;</button>
+                    <h3>Add New Repair</h3>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                        <input className="neon-input" required type="text" placeholder="Customer Name" value={formData.customerName} onChange={e => setFormData({...formData, customerName: e.target.value})} />
+                        <input className="neon-input" required type="text" placeholder="Customer Phone" value={formData.customerPhone} onChange={e => setFormData({...formData, customerPhone: e.target.value})} />
+                        <input className="neon-input" required type="text" placeholder="Device Model" value={formData.deviceModel} onChange={e => setFormData({...formData, deviceModel: e.target.value})} />
+                        <input className="neon-input" required type="text" placeholder="Issue Description" value={formData.issue} onChange={e => setFormData({...formData, issue: e.target.value})} />
+                        {!isWorker && (
+                            <select className="neon-input" style={{background: 'rgba(0,0,0,0.5)'}} value={formData.workerId} onChange={e => setFormData({...formData, workerId: e.target.value})}>
+                                <option value="">-- Unassigned --</option>
+                                {workers.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
+                            </select>
+                        )}
+                        <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Saving...' : 'Add Job'}</button>
+                    </form>
+                </div>
+            </div>
+        )}
+
+        <div className="glass-card" style={{ padding: '0' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <th style={{ padding: '1rem' }}>Device & Issue</th>
+                        <th style={{ padding: '1rem' }}>Customer</th>
+                        <th style={{ padding: '1rem' }}>Assigned To</th>
+                        <th style={{ padding: '1rem' }}>Costing</th>
+                        <th style={{ padding: '1rem' }}>Status</th>
+                        <th style={{ padding: '1rem' }}>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {jobs.length === 0 ? (
+                        <tr><td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No active repair jobs</td></tr>
+                    ) : (
+                        jobs.map(job => (
+                            <tr key={job._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <td style={{ padding: '1rem' }}>
+                                    <div style={{ fontWeight: 'bold' }}>{job.deviceModel}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{job.issue}</div>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                    <div>{job.customerName}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                        <Phone size={12}/> {job.customerPhone}
+                                    </div>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                    {!isWorker ? (
+                                        <select 
+                                            value={job.workerId?._id || ''} 
+                                            onChange={e => updateJob(job._id, { workerId: e.target.value })}
+                                            style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--border-color)', color: 'white', padding: '4px', borderRadius: '4px' }}
+                                        >
+                                            <option value="">Unassigned</option>
+                                            {workers.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
+                                        </select>
+                                    ) : (
+                                        <span style={{color: 'var(--text-secondary)'}}>{job.workerId?.name || 'Unassigned'}</span>
+                                    )}
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                    <input 
+                                        type="number" 
+                                        value={job.costing || 0} 
+                                        onChange={(e) => updateJob(job._id, { costing: Number(e.target.value) })}
+                                        style={{ width: '80px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--border-color)', color: 'white', padding: '4px', borderRadius: '4px' }}
+                                        onBlur={(e) => updateJob(job._id, { costing: Number(e.target.value) })}
+                                    />
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                    <select 
+                                        value={job.status} 
+                                        onChange={e => updateJob(job._id, { status: e.target.value })}
+                                        style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${getStatusColor(job.status)}`, color: getStatusColor(job.status), padding: '4px', borderRadius: '4px', fontWeight: 'bold' }}
+                                    >
+                                        <option value="Collected">Collected</option>
+                                        <option value="Assigned">Assigned</option>
+                                        <option value="In Repair">In Repair</option>
+                                        <option value="Ready">Ready</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                    <button onClick={() => sendWhatsAppUpdate(job)} className="btn btn-secondary" style={{ padding: '0.4rem', border: '1px solid rgba(0, 255, 136, 0.4)', color: 'var(--ok-green)', background: 'rgba(0,255,136,0.05)' }} title="Send WhatsApp Update">
+                                        <Send size={16} />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+        </div>
+    </div>
+  );
+};
+export default RepairManagement;
