@@ -9,9 +9,31 @@ const Subscription = () => {
     const navigate = useNavigate();
 
     const plans = [
-        { name: 'Shopkeeper', price: 5000, features: ['POS Access', 'Basic Reports', 'Up to 1000 Inventory Items'], icon: ShieldCheck },
-        { name: 'Wholesale', price: 10000, features: ['Everything in Shopkeeper', 'Chat Cashbook Ledger', 'Up to 5000 Inventory Items'], icon: Zap, popular: true },
-        { name: 'Retail Pro', price: 15000, features: ['Everything in Wholesale', 'Unlimited Inventory', 'Gamified Staff Accounts'], icon: Database }
+        { 
+            name: 'Shopkeeper', 
+            price: 1000, 
+            subtitle: 'Full Shop Management Software\n(Used Devices + Repair) For Indian Users',
+            features: ['1 Business Locations', '6 Users', 'Unlimited Products', 'Unlimited Invoices', 'Repair Module', 'Usedphones Module'], 
+            icon: ShieldCheck,
+            footerText: 'For Dealers who sell & repair phones, laptops, IPads etc'
+        },
+        { 
+            name: 'Wholesale', 
+            price: 5000, 
+            subtitle: 'Repair Shop Module for 2 Shops',
+            features: ['2 Business Locations', '12 Users', 'Unlimited Products', 'Unlimited Invoices', 'Repair Module'], 
+            icon: Zap, 
+            popular: true,
+            footerText: 'Repair Shop Module for 2 Shops'
+        },
+        { 
+            name: 'Retail Pro', 
+            price: 10000, 
+            subtitle: 'Full Shop Management Software\n(Used Devices + Repair) Global Version',
+            features: ['1 Business Locations', '6 Users', 'Unlimited Products', 'Unlimited Invoices', 'Repair Module', 'Usedphones Module'], 
+            icon: Database,
+            footerText: 'For Dealers who sell & repair phones, laptops, IPads etc'
+        }
     ];
 
     const upgradePlan = async (planName, price) => {
@@ -25,7 +47,7 @@ const Subscription = () => {
 
         try {
             // Create order
-            const orderRes = await fetch('http://localhost:5000/api/payments/create-order', {
+            const orderRes = await fetch('https://ok-ax2v.onrender.com/api/payments/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ amount: price, planName })
@@ -41,7 +63,7 @@ const Subscription = () => {
                 order_id: order.id,
                 handler: async function (response) {
                     // Verify payment
-                    const verifyRes = await fetch('http://localhost:5000/api/payments/verify', {
+                    const verifyRes = await fetch('https://ok-ax2v.onrender.com/api/payments/verify', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({
@@ -69,7 +91,7 @@ const Subscription = () => {
         } catch(err) {
             console.error(err);
             // Mock success for offline testing
-            const verifyRes = await fetch('http://localhost:5000/api/payments/verify', {
+            const verifyRes = await fetch('https://ok-ax2v.onrender.com/api/payments/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ razorpay_order_id: 'mock', razorpay_payment_id: 'mock', razorpay_signature: 'mock', planName })
@@ -85,7 +107,7 @@ const Subscription = () => {
     const startTrial = async (planName) => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/payments/start-trial', {
+            const res = await fetch('https://ok-ax2v.onrender.com/api/payments/start-trial', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ planName })
@@ -109,34 +131,42 @@ const Subscription = () => {
 
             <div style={{display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap'}}>
                 {plans.map(p => (
-                    <div key={p.name} className="glass-card" style={{width: '320px', display: 'flex', flexDirection: 'column', position: 'relative', border: p.popular ? '2px solid var(--neon-purple)' : undefined}}>
-                        {p.popular && <div style={{position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: 'var(--accent-gradient)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold'}}>MOST POPULAR</div>}
+                    <div key={p.name} className="glass-card" style={{width: '360px', display: 'flex', flexDirection: 'column', position: 'relative', border: p.popular ? '2px solid var(--neon-purple)' : undefined, padding: '2.5rem 1.5rem'}}>
+                        {p.popular && <div style={{position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: 'var(--accent-gradient)', padding: '5px 15px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '0.5px'}}>MOST POPULAR</div>}
                         
-                        <div style={{marginBottom: '1.5rem', textAlign: 'center'}}>
-                            <p.icon size={48} color={p.popular ? 'var(--neon-purple)' : 'var(--neon-blue)'} style={{margin: '1rem auto'}} />
-                            <h3>{p.name}</h3>
-                            <div className="text-gradient" style={{fontSize: '2rem', fontWeight: 800, margin: '1rem 0'}}>₹{p.price}<span style={{fontSize: '1rem', color: 'var(--text-secondary)'}}>/yr</span></div>
+                        <div style={{textAlign: 'center', flex: 1}}>
+                            <p.icon size={32} color={p.popular ? 'var(--neon-purple)' : 'var(--neon-blue)'} style={{margin: '0 auto 0.5rem'}} />
+                            <h3 style={{fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text-primary)'}}>{p.name}</h3>
+                            <p style={{fontSize: '1rem', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', minHeight: '3rem', margin: '0 0.5rem'}}>{p.subtitle}</p>
+                            
+                            <div style={{margin: '2rem 0', padding: '2rem 0', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
+                                {p.features.map(f => (
+                                    <div key={f} style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.2rem', fontSize: '1.05rem', color: 'var(--text-primary)'}}>
+                                        <span style={{color: 'var(--ok-green)', fontWeight: 'bold', fontSize: '1.2rem'}}>✓</span> {f}
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="text-gradient" style={{fontSize: '2.8rem', fontWeight: 800, marginBottom: '1.5rem'}}>₹{p.price.toLocaleString('en-IN')}<span style={{fontSize: '1.2rem', color: 'var(--text-secondary)', fontWeight: 500}}>{' '}/ 1 Years</span></div>
                         </div>
 
-                        <div style={{flex: 1, marginBottom: '2rem'}}>
-                            {p.features.map(f => (
-                                <div key={f} style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem'}}>
-                                    <span style={{color: 'var(--ok-green)'}}>✓</span> {f}
-                                </div>
-                            ))}
-                        </div>
-
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                            <button className={`btn ${p.popular ? 'btn-primary' : 'btn-secondary'}`} disabled={loading} onClick={() => upgradePlan(p.name, p.price)}>
-                                {loading ? 'Processing...' : `Upgrade to ${p.name}`}
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: 'auto'}}>
+                            <button className={`btn ${p.popular ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '1rem', fontSize: '1.1rem', fontWeight: 'bold'}} disabled={loading} onClick={() => upgradePlan(p.name, p.price)}>
+                                {loading ? 'Processing...' : `Register & subscribe`}
                             </button>
-                            <button className="btn btn-secondary" style={{color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', background: 'transparent'}} disabled={loading} onClick={() => startTrial(p.name)}>
+                            <button className="btn btn-secondary" style={{color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', background: 'transparent', padding: '0.8rem'}} disabled={loading} onClick={() => startTrial(p.name)}>
                                 Start 3-Day Free Trial
                             </button>
+                            {p.footerText && <div style={{background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '8px', marginTop: '0.5rem', textAlign: 'center'}}>
+                                <p style={{fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0}}>{p.footerText}</p>
+                            </div>}
                         </div>
                     </div>
                 ))}
             </div>
+
+            {/* Signature Watermark */}
+            <img src="/ojas-signature.png" alt="Ojas Kale Signature" style={{position: 'fixed', bottom: '20px', right: '30px', width: '150px', opacity: 0.7, zIndex: 9999, pointerEvents: 'none', filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.4))'}} />
         </div>
     );
 };

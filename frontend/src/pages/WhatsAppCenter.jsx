@@ -9,7 +9,7 @@ const WhatsAppCenter = () => {
   useEffect(() => {
       const fetchJobs = async () => {
           try {
-              const res = await fetch('http://localhost:5000/api/repairs', { headers: { 'Authorization': `Bearer ${token}` } });
+              const res = await fetch('https://ok-ax2v.onrender.com/api/repairs', { headers: { 'Authorization': `Bearer ${token}` } });
               if(res.ok) setJobs(await res.json());
           } catch(e) { console.error(e); }
       };

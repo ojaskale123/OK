@@ -13,7 +13,7 @@ const PosBilling = () => {
     const [categoryFilter, setCategoryFilter] = useState('All');
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/products', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch('https://ok-ax2v.onrender.com/api/products', { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => setProducts(data));
     }, [token]);
@@ -49,7 +49,7 @@ const PosBilling = () => {
     const checkout = async () => {
         if(cart.length === 0 || !customerName) return alert("Add items and customer name");
         try {
-            const res = await fetch('http://localhost:5000/api/pos', {
+            const res = await fetch('https://ok-ax2v.onrender.com/api/pos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ customerName, customerPhone, items: cart, subtotal, discountApplied: 0, finalTotal })

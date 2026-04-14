@@ -27,7 +27,7 @@ const Inventory = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/products', {
+            const res = await fetch('https://ok-ax2v.onrender.com/api/products', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -52,7 +52,7 @@ const Inventory = () => {
         e.preventDefault();
         setError(null);
         try {
-            const res = await fetch('http://localhost:5000/api/products', {
+            const res = await fetch('https://ok-ax2v.onrender.com/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ name, barcode, category, image, buyPrice: Number(buyPrice), price: Number(price), stockQuantity: Number(stock) })
@@ -74,7 +74,7 @@ const Inventory = () => {
 
     const saveEdit = async (id) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/products/${id}`, {
+            const res = await fetch(`https://ok-ax2v.onrender.com/api/products/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(editForm)

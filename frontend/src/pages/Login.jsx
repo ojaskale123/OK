@@ -17,7 +17,7 @@ const Login = () => {
     const body = isLogin ? { email, password } : { name, email, password };
 
     try {
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`https://ok-ax2v.onrender.com${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -72,6 +72,9 @@ const Login = () => {
           {isLogin ? 'Need an account? Sign up' : 'Already have an account? Login'}
         </div>
       </div>
+
+      {/* Signature Watermark */}
+      <img src="/ojas-signature.png" alt="Ojas Kale Signature" style={{position: 'fixed', bottom: '20px', right: '30px', width: '150px', opacity: 0.7, zIndex: 9999, pointerEvents: 'none', filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.4))'}} />
     </div>
   );
 };

@@ -17,7 +17,7 @@ const RepairManagement = () => {
 
   const fetchJobs = async () => {
       try {
-          const res = await fetch('http://localhost:5000/api/repairs', {
+          const res = await fetch('https://ok-ax2v.onrender.com/api/repairs', {
               headers: { 'Authorization': `Bearer ${token}` }
           });
           if(res.ok) setJobs(await res.json());
@@ -27,7 +27,7 @@ const RepairManagement = () => {
   const fetchWorkers = async () => {
       if(isWorker) return;
       try {
-          const res = await fetch('http://localhost:5000/api/workers', {
+          const res = await fetch('https://ok-ax2v.onrender.com/api/workers', {
               headers: { 'Authorization': `Bearer ${token}` }
           });
           if(res.ok) setWorkers(await res.json());
@@ -43,7 +43,7 @@ const RepairManagement = () => {
       e.preventDefault();
       setLoading(true);
       try {
-          const res = await fetch('http://localhost:5000/api/repairs', {
+          const res = await fetch('https://ok-ax2v.onrender.com/api/repairs', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
               body: JSON.stringify(formData)
@@ -63,7 +63,7 @@ const RepairManagement = () => {
 
   const updateJob = async (id, updates) => {
       try {
-          const res = await fetch(`http://localhost:5000/api/repairs/${id}`, {
+          const res = await fetch(`https://ok-ax2v.onrender.com/api/repairs/${id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
               body: JSON.stringify(updates)

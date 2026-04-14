@@ -40,6 +40,9 @@ const LandingPage = () => {
                     </div>
                 </section>
             </main>
+            
+            {/* Signature Watermark */}
+            <img src="/ojas-signature.png" alt="Ojas Kale Signature" style={{position: 'fixed', bottom: '20px', right: '30px', width: '150px', opacity: 0.7, zIndex: 9999, pointerEvents: 'none', filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.4))'}} />
         </div>
     )
 }
