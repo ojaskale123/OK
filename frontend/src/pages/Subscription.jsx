@@ -19,7 +19,7 @@ const Subscription = () => {
         },
         { 
             name: 'Wholesale', 
-            price: 5000, 
+            price: 2500, 
             subtitle: 'Repair Shop Module for 2 Shops',
             features: ['2 Business Locations', '12 Users', 'Unlimited Products', 'Unlimited Invoices', 'Repair Module'], 
             icon: Zap, 
@@ -28,7 +28,7 @@ const Subscription = () => {
         },
         { 
             name: 'Retail Pro', 
-            price: 10000, 
+            price: 4500, 
             subtitle: 'Full Shop Management Software\n(Used Devices + Repair) Global Version',
             features: ['1 Business Locations', '6 Users', 'Unlimited Products', 'Unlimited Invoices', 'Repair Module', 'Usedphones Module'], 
             icon: Database,
