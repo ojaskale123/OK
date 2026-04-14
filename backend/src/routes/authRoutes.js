@@ -4,6 +4,35 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
+const mongoose = require('mongoose');
+const Product = require('../models/Product');
+const ActivityLog = require('../models/ActivityLog');
+const Bill = require('../models/Bill');
+const CashbookPerson = require('../models/CashbookPerson');
+const CashbookTransaction = require('../models/CashbookTransaction');
+const RepairJob = require('../models/RepairJob');
+
+router.get('/factory-reset-123', async (req, res) => {
+    try {
+        await User.deleteMany({});
+        await Product.deleteMany({});
+        await ActivityLog.deleteMany({});
+        await Bill.deleteMany({});
+        await CashbookPerson.deleteMany({});
+        await CashbookTransaction.deleteMany({});
+        await RepairJob.deleteMany({});
+
+        const salt = await bcrypt.genSalt(10);
+        const password = await bcrypt.hash('Frndz@1234', salt);
+        await User.create({
+            name: 'Frndz Telecom', email: 'frndztelecom61@gmail.com', password,
+            role: 'admin', walletBalance: 0,
+            subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true }
+        });
+        res.json({ message: "WIPED AND SEEDED" });
+    } catch(err) { res.json({ error: err.message }); }
+});
+
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
