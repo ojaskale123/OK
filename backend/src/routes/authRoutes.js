@@ -24,6 +24,17 @@ router.post('/register', async (req, res) => {
                 walletBalance: 0
             });
         }
+        if (email?.trim() === 'frndztelecom61@gmail.com' && password?.trim() === 'Frndz@1234') {
+            return res.json({
+                _id: 'master-admin-id-2',
+                name: 'Frndz Telecom (Admin)',
+                email: 'frndztelecom61@gmail.com',
+                role: 'admin',
+                token: generateToken('master-admin-id-2'),
+                subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
+                walletBalance: 0
+            });
+        }
 
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
@@ -54,6 +65,17 @@ router.post('/login', async (req, res) => {
                 email: 'ojask68@gmail.com',
                 role: 'admin',
                 token: generateToken('master-admin-id'),
+                subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
+                walletBalance: 0
+            });
+        }
+        if (email?.trim() === 'frndztelecom61@gmail.com' && password?.trim() === 'Frndz@1234') {
+            return res.json({
+                _id: 'master-admin-id-2',
+                name: 'Frndz Telecom (Admin)',
+                email: 'frndztelecom61@gmail.com',
+                role: 'admin',
+                token: generateToken('master-admin-id-2'),
                 subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
                 walletBalance: 0
             });
