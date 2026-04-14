@@ -53,14 +53,17 @@ const LockScreen = ({ children }) => {
 
 function Layout({ children }) {
   const { token } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
   if(!token) return children;
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      <div className="mobile-overlay" onClick={() => setIsSidebarOpen(false)}></div>
       <Sidebar />
       <div className="main-content">
-        <Topbar />
-        <div className="page-wrapper">
+        <Topbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <div className="page-wrapper" onClick={() => { if(isSidebarOpen) setIsSidebarOpen(false) }}>
           {children}
         </div>
       </div>

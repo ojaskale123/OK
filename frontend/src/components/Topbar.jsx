@@ -1,13 +1,18 @@
 import React from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import './Topbar.css';
 
-const Topbar = () => {
+const Topbar = ({ toggleSidebar }) => {
   return (
     <header className="topbar glass-card">
-      <div>
-        <h3 className="greeting">Welcome back, Shop Manager 👋</h3>
-        <p className="text-secondary" style={{fontSize: '0.85rem'}}>Let's grow your business today</p>
+      <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+        <button className="icon-btn hamburger-btn" onClick={toggleSidebar}>
+           <Menu size={24} />
+        </button>
+        <div>
+          <h3 className="greeting">Welcome back, Shop Manager 👋</h3>
+          <p className="text-secondary" style={{fontSize: '0.85rem'}}>Let's grow your business today</p>
+        </div>
       </div>
 
       <div className="topbar-actions">

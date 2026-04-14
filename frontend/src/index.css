@@ -211,14 +211,66 @@ h1, h2, h3, h4, h5, h6 {
   animation: fadeIn 0.4s ease forwards;
 }
 
+.hamburger-btn {
+  display: none;
+}
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 95;
+  backdrop-filter: blur(2px);
+}
+
 @media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex;
+  }
+  .greeting {
+    font-size: 1.1rem;
+  }
   .app-container {
     flex-direction: column;
   }
   .main-content {
     margin-left: 0;
   }
-  :root {
-    --sidebar-width: 100%;
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 260px;
+    height: 100vh;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  .app-container.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+  .app-container.sidebar-open .mobile-overlay {
+    display: block;
+  }
+  /* Fix overlapping buttons by making things flex-wrap */
+  .glass-card {
+    padding: 1rem;
+  }
+  .page-wrapper {
+    padding: 1rem;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .btn {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+  /* Scrollable tables */
+  .table-container, .scrollable-x {
+    overflow-x: auto;
+    width: 100%;
+  }
+  table {
+    white-space: nowrap;
   }
 }
