@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Package, AlertTriangle, Plus, Barcode, TrendingUp, Image as ImageIcon } from 'lucide-react';
+import { Package, AlertTriangle, Plus, Barcode, TrendingUp, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 const CATEGORIES = ["Second Hand Mobile", "Batteries", "Accessories", "Others"];
 
@@ -82,6 +82,19 @@ const Inventory = () => {
             const data = await res.json();
             setProducts(products.map(p => p._id === id ? data : p));
             setEditProductId(null);
+        } catch(e) { console.error(e); }
+    }
+
+    const deleteProduct = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this product?")) return;
+        try {
+            const res = await fetch(`https://ok-ax2v.onrender.com/api/products/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                setProducts(products.filter(p => p._id !== id));
+            }
         } catch(e) { console.error(e); }
     }
 
@@ -237,7 +250,12 @@ const Inventory = () => {
 
                                         <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                                             {p.barcode ? <div style={{fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-secondary)'}}>{p.barcode}</div> : <div/>}
-                                            <button className="btn" style={{padding: '0.2rem 0.6rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)'}} onClick={() => startEdit(p)}>Edit</button>
+                                            <div style={{display: 'flex', gap: '0.5rem'}}>
+                                                <button className="btn" style={{padding: '0.2rem 0.6rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)'}} onClick={() => startEdit(p)}>Edit</button>
+                                                <button className="btn" style={{display: 'flex', alignItems: 'center', padding: '0.2rem 0.6rem', fontSize: '0.75rem', background: 'rgba(255, 60, 60, 0.2)', color: 'var(--ok-red)'}} onClick={() => deleteProduct(p._id)}>
+                                                    <Trash2 size={12} style={{marginRight: '4px'}}/> Delete
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

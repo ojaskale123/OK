@@ -109,4 +109,39 @@ router.put('/:id', protect, async (req, res) => {
     } catch(err) { res.status(500).json({message: "Error"}); }
 });
 
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        if (req.user._id === 'master-admin-id') {
+            const index = masterProducts.findIndex(p => p._id === req.params.id);
+            if(index !== -1) {
+                const deletedName = masterProducts[index].name;
+                masterProducts.splice(index, 1);
+                global.masterLogs = global.masterLogs || [];
+                global.masterLogs.push({
+                    _id: Date.now().toString(), date: new Date().toISOString(),
+                    user: req.user._id, actionType: 'PRODUCT_DELETE', description: `Deleted Item: ${deletedName}`, metadata: {}
+                });
+                return res.json({ message: "Product removed" });
+            }
+            return res.status(404).json({message: "Not found"});
+        }
+
+        const product = await Product.findById(req.params.id);
+        if(!product || product.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({message: "Not allowed"});
+        }
+        
+        const deletedName = product.name;
+        await Product.findByIdAndDelete(req.params.id);
+
+        await ActivityLog.create({
+            user: req.user._id.toString(), actionType: 'PRODUCT_DELETE', description: `Deleted Item: ${deletedName}`, metadata: {}
+        });
+
+        res.json({ message: "Product removed" });
+    } catch (err) {
+        res.status(500).json({ message: "Error" });
+    }
+});
+
 module.exports = router;

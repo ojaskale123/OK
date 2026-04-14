@@ -19,11 +19,20 @@ const PosBilling = () => {
     }, [token]);
 
     const addToCart = (product) => {
+        if (product.stockQuantity <= 0) {
+            alert("Item is out of stock!");
+            return;
+        }
+        
         const existing = cart.find(c => c.product === product._id);
         if(existing) {
+            if (existing.quantity + 1 > product.stockQuantity) {
+                alert("Cannot add more than available stock!");
+                return;
+            }
             setCart(cart.map(c => c.product === product._id ? { ...c, quantity: c.quantity + 1, total: (c.quantity + 1) * c.price } : c));
         } else {
-            setCart([...cart, { product: product._id, name: product.name, price: product.price, quantity: 1, total: product.price }]);
+            setCart([...cart, { product: product._id, name: product.name, price: product.price, quantity: 1, total: product.price, stockQuantity: product.stockQuantity }]);
         }
     }
 
@@ -31,6 +40,10 @@ const PosBilling = () => {
         setCart(cart.map(c => {
             if(c.product === productId) {
                 const newQuantity = c.quantity + delta;
+                if (newQuantity > c.stockQuantity) {
+                    alert("Cannot add more than available stock!");
+                    return c;
+                }
                 return { ...c, quantity: newQuantity, total: newQuantity * c.price };
             }
             return c;
