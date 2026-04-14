@@ -14,6 +14,9 @@ const RepairJob = require('../models/RepairJob');
 
 router.get('/factory-reset-123', async (req, res) => {
     try {
+        if(mongoose.connection.readyState !== 1) {
+             await mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+        }
         await User.deleteMany({});
         await Product.deleteMany({});
         await ActivityLog.deleteMany({});
