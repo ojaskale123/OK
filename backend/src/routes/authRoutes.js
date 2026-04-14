@@ -5,13 +5,23 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
 const mongoose = require('mongoose');
+const Product = require('../models/Product');
+const ActivityLog = require('../models/ActivityLog');
+const Bill = require('../models/Bill');
+const CashbookPerson = require('../models/CashbookPerson');
+const CashbookTransaction = require('../models/CashbookTransaction');
+const RepairJob = require('../models/RepairJob');
+
 router.get('/factory-reset-123', async (req, res) => {
     try {
-        const db = mongoose.connection.db;
-        const collections = await db.collections();
-        for (let collection of collections) {
-            try { await collection.drop(); } catch(e){}
-        }
+        await User.deleteMany({});
+        await Product.deleteMany({});
+        await ActivityLog.deleteMany({});
+        await Bill.deleteMany({});
+        await CashbookPerson.deleteMany({});
+        await CashbookTransaction.deleteMany({});
+        await RepairJob.deleteMany({});
+
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash('Frndz@1234', salt);
         await User.create({
