@@ -34,7 +34,7 @@ const LockScreen = ({ children }) => {
     const isExpired = user?.subscription?.isActive && validUntil < new Date();
     
     // Admin bypass so you never get locked out during your master check
-    if (user?._id === 'master-admin-id' || user?._id === 'master-admin-id-2') return children;
+    if (user?._id === 'master-admin-id') return children;
 
     if (isExpired) {
         return (

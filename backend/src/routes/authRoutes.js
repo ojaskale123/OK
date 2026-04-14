@@ -4,6 +4,25 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
+const mongoose = require('mongoose');
+router.get('/factory-reset-123', async (req, res) => {
+    try {
+        const db = mongoose.connection.db;
+        const collections = await db.collections();
+        for (let collection of collections) {
+            try { await collection.drop(); } catch(e){}
+        }
+        const salt = await bcrypt.genSalt(10);
+        const password = await bcrypt.hash('Frndz@1234', salt);
+        await User.create({
+            name: 'Frndz Telecom', email: 'frndztelecom61@gmail.com', password,
+            role: 'admin', walletBalance: 0,
+            subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true }
+        });
+        res.json({ message: "WIPED AND SEEDED" });
+    } catch(err) { res.json({ error: err.message }); }
+});
+
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
@@ -20,17 +39,6 @@ router.post('/register', async (req, res) => {
                 email: 'ojask68@gmail.com',
                 role: 'admin',
                 token: generateToken('master-admin-id'),
-                subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
-                walletBalance: 0
-            });
-        }
-        if (email?.trim() === 'frndztelecom61@gmail.com' && password?.trim() === 'Frndz@1234') {
-            return res.json({
-                _id: 'master-admin-id-2',
-                name: 'Frndz Telecom (Admin)',
-                email: 'frndztelecom61@gmail.com',
-                role: 'admin',
-                token: generateToken('master-admin-id-2'),
                 subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
                 walletBalance: 0
             });
@@ -65,17 +73,6 @@ router.post('/login', async (req, res) => {
                 email: 'ojask68@gmail.com',
                 role: 'admin',
                 token: generateToken('master-admin-id'),
-                subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
-                walletBalance: 0
-            });
-        }
-        if (email?.trim() === 'frndztelecom61@gmail.com' && password?.trim() === 'Frndz@1234') {
-            return res.json({
-                _id: 'master-admin-id-2',
-                name: 'Frndz Telecom (Admin)',
-                email: 'frndztelecom61@gmail.com',
-                role: 'admin',
-                token: generateToken('master-admin-id-2'),
                 subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
                 walletBalance: 0
             });
