@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const ActivityLog = require('../models/ActivityLog');
 const { protect } = require('../middleware/authMiddleware');
 
 // Get all workers for the logged-in shopkeeper
@@ -38,6 +39,12 @@ router.post('/', protect, async (req, res) => {
             password,
             role: 'worker',
             employerId: req.user._id
+        });
+
+        // Record this securely in the History tab
+        await ActivityLog.create({
+            userId: req.user._id,
+            action: `Added Worker Staff: ${worker.name} (${worker.email})`
         });
 
         res.status(201).json({ message: 'Worker created successfully', worker: { _id: worker._id, name: worker.name, email: worker.email } });

@@ -35,6 +35,9 @@ const LockScreen = ({ children }) => {
     
     // Admin bypass so you never get locked out during your master check
     if (user?._id === 'master-admin-id') return children;
+    
+    // Workers do not require their own subscription, they run on the employer's plan
+    if (user?.role === 'worker') return children;
 
     if (isExpired) {
         return (
