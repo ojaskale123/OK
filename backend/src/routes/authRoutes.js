@@ -60,7 +60,10 @@ router.post('/register', async (req, res) => {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-        const user = await User.create({ name, email, password });
+        // Generate a unique referral code to bypass any accidental MongoDB unique null index collisions
+        const referralCode = `OK-${Math.floor(1000 + Math.random() * 9000)}-${Date.now().toString().slice(-4)}`;
+
+        const user = await User.create({ name, email, password, referralCode });
         res.status(201).json({
             _id: user._id,
             name: user.name,
@@ -70,7 +73,8 @@ router.post('/register', async (req, res) => {
             subscription: user.subscription
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error("Register Error Details:", error);
+        res.status(500).json({ message: error.message || 'Server error', details: error.toString() });
     }
 });
 
