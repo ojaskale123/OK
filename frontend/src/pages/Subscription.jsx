@@ -52,56 +52,61 @@ const Subscription = () => {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ amount: price, planName })
             });
-            const { order } = await orderRes.json();
+            
+            if(!orderRes.ok) {
+                 const errData = await orderRes.text();
+                 throw new Error(errData || "Failed to create order");
+            }
+
+            const { order, key } = await orderRes.json();
 
             const options = {
-                key: 'dummy_key', // Handled by server actually, but razorpay needs it on frontend to not throw error in real env
+                key: key, 
                 amount: order.amount,
                 currency: "INR",
                 name: "OK ERP",
                 description: `Upgrade to ${planName}`,
                 order_id: order.id,
                 handler: async function (response) {
-                    // Verify payment
-                    const verifyRes = await fetch('https://ok-ax2v.onrender.com/api/payments/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature || 'mock_sig',
-                            planName
-                        })
-                    });
-                    const data = await verifyRes.json();
-                    alert("Payment Success! 500 Gamification Credits Awarded.");
-                    updateUser({ subscription: data.subscription, walletBalance: user.walletBalance + 500 });
-                    navigate('/dashboard');
+                    try {
+                        setLoading(true);
+                        // Verify payment
+                        const verifyRes = await fetch('https://ok-ax2v.onrender.com/api/payments/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                planName
+                            })
+                        });
+                        
+                        const data = await verifyRes.json();
+                        if(!verifyRes.ok) throw new Error(data.message || "Verification failed");
+                        
+                        alert("Payment Success! 500 Gamification Credits Awarded.");
+                        updateUser({ subscription: data.subscription, walletBalance: user.walletBalance + 500 });
+                        navigate('/dashboard');
+                    } catch(verifyErr) {
+                        alert("Verification Error: " + verifyErr.message);
+                        setLoading(false);
+                    }
                 },
                 theme: { color: "#8b5cf6" }
             };
 
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (response){
-                alert("Payment Failed. Mocking success anyway for demo.");
-                // For this demo, let's trigger success anyway
-                options.handler({ razorpay_payment_id: 'mock', razorpay_order_id: order.id });
+                alert(`Payment Failed: ${response.error.description}`);
+                setLoading(false);
             });
             rzp.open();
         } catch(err) {
             console.error(err);
-            // Mock success for offline testing
-            const verifyRes = await fetch('https://ok-ax2v.onrender.com/api/payments/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ razorpay_order_id: 'mock', razorpay_payment_id: 'mock', razorpay_signature: 'mock', planName })
-            });
-            const data = await verifyRes.json();
-            alert("Payment Mocked Successfully! 500 Gamification Credits Awarded. UI Updated.");
-            updateUser({ subscription: data.subscription, walletBalance: user.walletBalance + 500 });
-            navigate('/dashboard');
+            alert("Error initiating payment: " + err.message);
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const startTrial = async (planName) => {

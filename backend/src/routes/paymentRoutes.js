@@ -20,7 +20,7 @@ router.post('/create-order', protect, async (req, res) => {
     };
     try {
         const order = await razorpay.orders.create(options);
-        res.json({ order, planName });
+        res.json({ order, planName, key: process.env.RAZORPAY_KEY_ID });
     } catch (error) {
         console.error(error);
         res.status(500).send("Error creating Razorpay order");
@@ -31,11 +31,14 @@ router.post('/create-order', protect, async (req, res) => {
 router.post('/verify', protect, async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planName } = req.body;
     
-    // In production we verify signature! For this MVP we will mock verify if secret is 'test'
-    // const body = razorpay_order_id + "|" + razorpay_payment_id;
-    // const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET).update(body.toString()).digest('hex');
-    // if(expectedSignature !== razorpay_signature) ...
-    // Since we'll test locally without real credentials, we just accept the payment:
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET)
+                                    .update(body.toString())
+                                    .digest('hex');
+                                    
+    if (expectedSignature !== razorpay_signature) {
+        return res.status(400).json({ message: "Payment verification failed. Invalid signature." });
+    }
 
     // Activate Subscription
     const validUntil = new Date();
