@@ -41,18 +41,16 @@ const Dashboard = () => {
                 <span className="text-secondary">Today's Sales</span>
                 <TrendingUp color="var(--neon-blue)" />
             </div>
-            <h3>₹14,500</h3>
+            <h3>₹0</h3>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="amount-receive" style={{fontSize: '0.85rem'}}>+12% from yesterday</p>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>No sales recorded yet</p>
                 {activeCard === 'sales' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             {activeCard === 'sales' && (
                 <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
                     <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Top Items Sold Today:</p>
-                    <ul style={{listStyle: 'none', fontSize: '0.9rem'}}>
-                        <li>1. Premium Rice (50kg)</li>
-                        <li>2. Wheat Flour (10kg)</li>
-                        <li>3. Cooking Oil (5L)</li>
+                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>
+                        <li>No items sold yet.</li>
                     </ul>
                 </div>
             )}
@@ -64,17 +62,16 @@ const Dashboard = () => {
                 <span className="text-secondary">Low Stock Items</span>
                 <Package color="var(--ok-red)" />
             </div>
-            <h3>24</h3>
+            <h3>0</h3>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="amount-give" style={{fontSize: '0.85rem'}}>Requires action</p>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>All stock optimal</p>
                 {activeCard === 'stock' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             {activeCard === 'stock' && (
                 <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
                     <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Critically Low:</p>
-                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--ok-red)'}}>
-                        <li>• Sugar Packets (2 left)</li>
-                        <li>• Salt 1kg (5 left)</li>
+                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>
+                        <li>Inventory is perfectly stocked.</li>
                     </ul>
                     <Link to="/inventory" className="text-gradient" style={{display: 'inline-block', marginTop: '0.5rem', fontSize: '0.85rem'}}>Manage Inventory ➔</Link>
                 </div>
@@ -87,15 +84,15 @@ const Dashboard = () => {
                 <span className="text-secondary">Net Cashbook</span>
                 <Users color="var(--neon-purple)" />
             </div>
-            <h3 className="amount-receive">₹+45,000</h3>
+            <h3>₹0</h3>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="text-secondary" style={{fontSize: '0.85rem'}}>Owed to you overall</p>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>All ledgers clear</p>
                 {activeCard === 'cashbook' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             {activeCard === 'cashbook' && (
                 <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
                     <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Biggest Debtor:</p>
-                    <p style={{fontSize: '0.9rem'}}>Ramesh Shop: <span className="amount-receive">₹12,000</span></p>
+                    <p style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>No pending balances.</p>
                     <Link to="/cashbook" className="text-gradient" style={{display: 'inline-block', marginTop: '0.5rem', fontSize: '0.85rem'}}>Open Ledger ➔</Link>
                 </div>
             )}
@@ -128,12 +125,7 @@ const Dashboard = () => {
          <h3 style={{marginBottom: '1rem'}}>Recent Platform Activity</h3>
          <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
              <div style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between'}}>
-                 <span>System Check completed</span>
-                 <span className="text-secondary">10 mins ago</span>
-             </div>
-             <div style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between'}}>
-                 <span>New trial activated on master account</span>
-                 <span className="text-secondary">2 hours ago</span>
+                 <span className="text-secondary">No recent activity logged. Start billing to generate history!</span>
              </div>
          </div>
       </div>
