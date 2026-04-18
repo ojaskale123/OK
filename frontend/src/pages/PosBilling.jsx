@@ -11,6 +11,7 @@ const PosBilling = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
+    const [billingMode, setBillingMode] = useState('Customer'); // 'Customer' or 'Retailer'
 
     useEffect(() => {
         fetch('https://ok-ax2v.onrender.com/api/products', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -24,15 +25,18 @@ const PosBilling = () => {
             return;
         }
         
+        // Determine the price based on the current billing mode
+        const activePrice = billingMode === 'Retailer' ? (product.retailerPrice || product.price) : product.price;
+        
         const existing = cart.find(c => c.product === product._id);
         if(existing) {
             if (existing.quantity + 1 > product.stockQuantity) {
                 alert("Cannot add more than available stock!");
                 return;
             }
-            setCart(cart.map(c => c.product === product._id ? { ...c, quantity: c.quantity + 1, total: (c.quantity + 1) * c.price } : c));
+            setCart(cart.map(c => c.product === product._id ? { ...c, quantity: c.quantity + 1, total: (c.quantity + 1) * existing.price } : c));
         } else {
-            setCart([...cart, { product: product._id, name: product.name, price: product.price, quantity: 1, total: product.price, stockQuantity: product.stockQuantity }]);
+            setCart([...cart, { product: product._id, name: product.name, price: activePrice, quantity: 1, total: activePrice, stockQuantity: product.stockQuantity }]);
         }
     }
 
@@ -80,9 +84,17 @@ const PosBilling = () => {
             <div style={{flex: 2}}>
                 <h2 className="text-gradient" style={{marginBottom: '1rem'}}>Point of Sale (POS)</h2>
                 {successMsg && <div className="glass-card" style={{borderColor: 'var(--ok-green)', marginBottom: '1rem'}}><p className="amount-receive">{successMsg}</p></div>}
+                
+                {/* Billing Mode Toggle */}
+                <div style={{display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center'}}>
+                    <span className="text-secondary" style={{fontSize: '0.9rem'}}>Sale Type:</span>
+                    <button className={`btn ${billingMode === 'Customer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Customer')}>Customer</button>
+                    <button className={`btn ${billingMode === 'Retailer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Retailer')}>Retailer</button>
+                </div>
+
                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1.5rem'}}>
                     {['All', 'Second Hand Mobile', 'Batteries', 'Accessories', 'Others'].map(cat => (
-                        <button key={cat} className={`btn ${categoryFilter === cat ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 0.8rem', fontSize: '0.8rem'}} onClick={() => setCategoryFilter(cat)}>{cat}</button>
+                        <button key={cat} className={`btn ${categoryFilter === cat ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 0.8rem', fontSize: '0.85rem'}} onClick={() => setCategoryFilter(cat)}>{cat}</button>
                     ))}
                 </div>
 
@@ -112,7 +124,7 @@ const PosBilling = () => {
                             <div style={{padding: '1rem', textAlign: 'center'}}>
                                 <div style={{fontWeight: 600, marginBottom: '0.25rem', color: '#fff', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{p.name}</div>
                                 {p.barcode && <div style={{fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', fontFamily: 'monospace'}}>{p.barcode}</div>}
-                                <div className="text-gradient" style={{fontWeight: 'bold'}}>₹{p.price}</div>
+                                <div className="text-gradient" style={{fontWeight: 'bold'}}>₹{billingMode === 'Retailer' ? (p.retailerPrice || p.price) : p.price}</div>
                             </div>
                         </div>
                     ))}

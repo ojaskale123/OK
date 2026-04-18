@@ -21,7 +21,7 @@ const Sidebar = () => {
     { name: 'Chat Cashbook', path: '/cashbook', icon: BookOpen, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
     { name: 'WhatsApp Bot', path: '/whatsapp', icon: MessageSquare, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
     { name: 'Action History', path: '/history', icon: FileText },
-    { name: 'Gamification', path: '/rewards', icon: Gift, hidden: isWorker },
+
     { name: 'Profile', path: '/profile', icon: User },
   ];
 
@@ -60,10 +60,7 @@ const Sidebar = () => {
         <Link to="/plans" className="btn btn-primary" style={{width: '100%', marginBottom: '1rem', padding: '0.5rem', fontSize: '0.8rem'}}>
             <Crown size={16} /> Manage Plan
         </Link>
-        <div className="wallet-card" style={{padding: '0.75rem'}}>
-          <span className="text-secondary" style={{fontSize: '0.7rem'}}>Reward Wallet</span>
-          <h4 style={{color: '#fbbf24', marginTop: '2px'}}>{user?.walletBalance || 0} Credits</h4>
-        </div>
+
       </div>
     </aside>
   );

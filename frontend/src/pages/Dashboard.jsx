@@ -98,27 +98,7 @@ const Dashboard = () => {
             )}
         </div>
 
-        {/* Wallet Card */}
-        <div className="glass-card" style={{ cursor: 'pointer', outline: activeCard === 'wallet' ? '2px solid #fbbf24' : 'none' }} onClick={() => toggleCard('wallet')}>
-            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}>
-                <span className="text-secondary">Gamification Wallet</span>
-                <Wallet color="#fbbf24" />
-            </div>
-            <h3 style={{color: '#fbbf24'}}>{user?.walletBalance || 0} Credits</h3>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="amount-receive" style={{fontSize: '0.85rem'}}>Can be used for discounts</p>
-                {activeCard === 'wallet' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </div>
-            {activeCard === 'wallet' && (
-                <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
-                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>How to earn more:</p>
-                    <p style={{fontSize: '0.9rem'}}>- Process POS Bills (+5)</p>
-                    <p style={{fontSize: '0.9rem'}}>- Refer Friends (+500)</p>
-                    <p style={{fontSize: '0.9rem'}}>- Daily Scratch Card</p>
-                    <Link to="/rewards" style={{display: 'inline-block', marginTop: '0.5rem', color: '#fbbf24', fontSize: '0.85rem'}}>Go to Rewards Hub ➔</Link>
-                </div>
-            )}
-        </div>
+
       </div>
 
       <div className="glass-card">

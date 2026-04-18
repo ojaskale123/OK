@@ -15,7 +15,8 @@ const Inventory = () => {
     const [category, setCategory] = useState('Others');
     const [image, setImage] = useState('');
     const [buyPrice, setBuyPrice] = useState('');
-    const [price, setPrice] = useState(''); // Sell Price
+    const [price, setPrice] = useState(''); // Customer Price
+    const [retailerPrice, setRetailerPrice] = useState(''); // Retailer Price
     const [stock, setStock] = useState('');
     
     const [editProductId, setEditProductId] = useState(null);
@@ -55,13 +56,13 @@ const Inventory = () => {
             const res = await fetch('https://ok-ax2v.onrender.com/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ name, barcode, category, image, buyPrice: Number(buyPrice), price: Number(price), stockQuantity: Number(stock) })
+                body: JSON.stringify({ name, barcode, category, image, buyPrice: Number(buyPrice), price: Number(price), retailerPrice: Number(retailerPrice || price), stockQuantity: Number(stock) })
             });
             const data = await res.json();
             if(!res.ok) throw new Error(data.message);
             
             setProducts([...products, data]);
-            setName(''); setBarcode(''); setCategory('Others'); setImage(''); setBuyPrice(''); setPrice(''); setStock('');
+            setName(''); setBarcode(''); setCategory('Others'); setImage(''); setBuyPrice(''); setPrice(''); setRetailerPrice(''); setStock('');
         } catch(err) {
             setError(err.message);
         }
@@ -69,7 +70,7 @@ const Inventory = () => {
 
     const startEdit = (p) => {
         setEditProductId(p._id);
-        setEditForm({ name: p.name, barcode: p.barcode, category: p.category, image: p.image, buyPrice: p.buyPrice, price: p.price, stockQuantity: p.stockQuantity });
+        setEditForm({ name: p.name, barcode: p.barcode, category: p.category, image: p.image, buyPrice: p.buyPrice, price: p.price, retailerPrice: p.retailerPrice || p.price, stockQuantity: p.stockQuantity });
     }
 
     const saveEdit = async (id) => {
@@ -162,8 +163,12 @@ const Inventory = () => {
                                 <input placeholder="Cost" type="number" className="form-input" value={buyPrice} onChange={e=>setBuyPrice(e.target.value)} required />
                             </div>
                             <div className="form-group" style={{flex: 1}}>
-                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Sell Price (₹)</label>
+                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Cust. Price (₹)</label>
                                 <input placeholder="Retail" type="number" className="form-input" value={price} onChange={e=>setPrice(e.target.value)} required />
+                            </div>
+                            <div className="form-group" style={{flex: 1}}>
+                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Wholesale (₹)</label>
+                                <input placeholder="Dealer" type="number" className="form-input" value={retailerPrice} onChange={e=>setRetailerPrice(e.target.value)} required />
                             </div>
                         </div>
                         
@@ -203,7 +208,8 @@ const Inventory = () => {
                                         </select>
                                         <div style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem'}}>
                                             <input type="number" placeholder="Buy" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.buyPrice} onChange={e=>setEditForm({...editForm, buyPrice: e.target.value})} />
-                                            <input type="number" placeholder="Sell" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} />
+                                            <input type="number" placeholder="Cust." className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} />
+                                            <input type="number" placeholder="Retailer" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.retailerPrice} onChange={e=>setEditForm({...editForm, retailerPrice: e.target.value})} />
                                         </div>
                                         <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem'}}>
                                             <input type="number" placeholder="Qty" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem', width: '60px'}} value={editForm.stockQuantity} onChange={e=>setEditForm({...editForm, stockQuantity: e.target.value})} />
@@ -234,10 +240,10 @@ const Inventory = () => {
                                         
                                         <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '1rem'}}>
                                             <div>
-                                                <div className="text-secondary" style={{fontSize: '0.75rem'}}>Buy / Sell</div>
-                                                <div style={{fontWeight: 'bold'}}>
-                                                    <span className="text-secondary" style={{textDecoration: 'line-through', marginRight: '4px', fontSize: '0.85em'}}>₹{p.buyPrice}</span> 
+                                                <div className="text-secondary" style={{fontSize: '0.75rem'}}>Cust / Wholesale</div>
+                                                <div style={{fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px'}}>
                                                     <span className="text-gradient">₹{p.price}</span>
+                                                    <span className="text-secondary" style={{fontSize: '0.85em'}}>| ₹{p.retailerPrice || p.price}</span> 
                                                 </div>
                                             </div>
                                             <div style={{textAlign: 'right'}}>
