@@ -4,8 +4,38 @@ import { TrendingUp, Package, Users, Wallet, Crown, ChevronDown, ChevronUp } fro
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [activeCard, setActiveCard] = useState(null);
+  const [stats, setStats] = useState({
+      todaySales: 0,
+      lowStockItemsCount: 0,
+      criticalItems: [],
+      netCashbook: 0,
+      recentActivity: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+      const fetchStats = async () => {
+          if (!user?.subscription?.isActive || user?.subscription?.plan === 'None') {
+             setLoading(false);
+             return;
+          }
+          try {
+              const res = await fetch('https://ok-ax2v.onrender.com/api/dashboard/stats', {
+                  headers: { 'Authorization': `Bearer ${token}` }
+              });
+              const data = await res.json();
+              if (res.ok) setStats(data);
+          } catch(e) {
+              console.error("Failed to load stats", e);
+          } finally {
+              setLoading(false);
+          }
+      };
+      
+      fetchStats();
+  }, [token, user]);
   
   const plan = user?.subscription?.plan || 'None';
   const isActive = user?.subscription?.isActive;
@@ -41,16 +71,20 @@ const Dashboard = () => {
                 <span className="text-secondary">Today's Sales</span>
                 <TrendingUp color="var(--neon-blue)" />
             </div>
-            <h3>₹0</h3>
+            <h3>{loading ? '...' : `₹${stats.todaySales.toLocaleString()}`}</h3>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="text-secondary" style={{fontSize: '0.85rem'}}>No sales recorded yet</p>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>Live Revenue Pipeline</p>
                 {activeCard === 'sales' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             {activeCard === 'sales' && (
                 <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
-                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Top Items Sold Today:</p>
-                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>
-                        <li>No items sold yet.</li>
+                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Recent Completed Sales:</p>
+                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)', paddingLeft: '0'}}>
+                        {stats.recentActivity.length > 0 ? stats.recentActivity.map((r, i) => (
+                             <li key={i} style={{marginBottom: '4px'}}>• {r.desc} - <span className="text-gradient">₹{r.amount}</span></li>
+                        )) : (
+                             <li>No sales recorded today yet.</li>
+                        )}
                     </ul>
                 </div>
             )}
@@ -62,16 +96,20 @@ const Dashboard = () => {
                 <span className="text-secondary">Low Stock Items</span>
                 <Package color="var(--ok-red)" />
             </div>
-            <h3>0</h3>
+            <h3 style={{color: stats.lowStockItemsCount > 0 ? 'var(--ok-red)' : '#fff'}}>{loading ? '...' : stats.lowStockItemsCount}</h3>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="text-secondary" style={{fontSize: '0.85rem'}}>All stock optimal</p>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>{stats.lowStockItemsCount > 0 ? 'Requires action' : 'All stock optimal'}</p>
                 {activeCard === 'stock' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             {activeCard === 'stock' && (
                 <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
                     <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Critically Low:</p>
-                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>
-                        <li>Inventory is perfectly stocked.</li>
+                    <ul style={{listStyle: 'none', fontSize: '0.9rem', color: 'var(--text-secondary)', paddingLeft: '0'}}>
+                        {stats.criticalItems.length > 0 ? stats.criticalItems.map((c, i) => (
+                             <li key={i} style={{marginBottom: '4px'}}>• {c.name} (<span style={{color: 'var(--ok-red)'}}>{c.stock} left</span>)</li>
+                        )) : (
+                             <li>Inventory is perfectly stocked.</li>
+                        )}
                     </ul>
                     <Link to="/inventory" className="text-gradient" style={{display: 'inline-block', marginTop: '0.5rem', fontSize: '0.85rem'}}>Manage Inventory ➔</Link>
                 </div>
@@ -84,15 +122,19 @@ const Dashboard = () => {
                 <span className="text-secondary">Net Cashbook</span>
                 <Users color="var(--neon-purple)" />
             </div>
-            <h3>₹0</h3>
+            <h3 style={{color: stats.netCashbook > 0 ? 'var(--ok-green)' : stats.netCashbook < 0 ? 'var(--ok-red)' : '#fff'}}>{loading ? '...' : `₹${stats.netCashbook.toLocaleString()}`}</h3>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <p className="text-secondary" style={{fontSize: '0.85rem'}}>All ledgers clear</p>
+                <p className="text-secondary" style={{fontSize: '0.85rem'}}>
+                   {stats.netCashbook === 0 ? 'All ledgers clear' : stats.netCashbook > 0 ? 'Owed to you overall' : 'You owe overall'}
+                </p>
                 {activeCard === 'cashbook' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
             {activeCard === 'cashbook' && (
                 <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease'}}>
-                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Biggest Debtor:</p>
-                    <p style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>No pending balances.</p>
+                    <p className="text-secondary" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Ledger Status:</p>
+                    <p style={{fontSize: '0.9rem', color: 'var(--text-secondary)'}}>
+                        {stats.netCashbook === 0 ? 'No pending balances.' : 'You have pending settlements.'}
+                    </p>
                     <Link to="/cashbook" className="text-gradient" style={{display: 'inline-block', marginTop: '0.5rem', fontSize: '0.85rem'}}>Open Ledger ➔</Link>
                 </div>
             )}
@@ -104,9 +146,16 @@ const Dashboard = () => {
       <div className="glass-card">
          <h3 style={{marginBottom: '1rem'}}>Recent Platform Activity</h3>
          <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-             <div style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between'}}>
-                 <span className="text-secondary">No recent activity logged. Start billing to generate history!</span>
-             </div>
+             {stats.recentActivity.length > 0 ? stats.recentActivity.map((r, i) => (
+                 <div key={i} style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderLeft: '3px solid var(--neon-blue)', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                     <span>{r.desc} <span className="text-gradient" style={{fontWeight: 'bold', marginLeft: '8px'}}>₹{r.amount}</span></span>
+                     <span className="text-secondary" style={{fontSize: '0.8rem'}}>{new Date(r.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                 </div>
+             )) : (
+                 <div style={{padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between'}}>
+                     <span className="text-secondary">No recent activity logged. Start billing to generate history!</span>
+                 </div>
+             )}
          </div>
       </div>
     </div>

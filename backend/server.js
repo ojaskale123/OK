@@ -39,8 +39,11 @@ app.use('/api/history', historyRoutes);
 
 const workerRoutes = require('./src/routes/workerRoutes');
 const repairRoutes = require('./src/routes/repairRoutes');
+const dashboardRoutes = require('./src/routes/dashboardRoutes');
+
 app.use('/api/workers', workerRoutes);
 app.use('/api/repairs', repairRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
