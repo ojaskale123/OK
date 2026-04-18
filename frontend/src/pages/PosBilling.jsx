@@ -12,6 +12,7 @@ const PosBilling = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
     const [billingMode, setBillingMode] = useState('Customer'); // 'Customer' or 'Retailer'
+    const [lastSale, setLastSale] = useState(null);
 
     useEffect(() => {
         fetch('https://ok-ax2v.onrender.com/api/products', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -83,6 +84,7 @@ const PosBilling = () => {
                 body: JSON.stringify({ customerName, customerPhone, items: cart, subtotal, discountApplied: 0, finalTotal })
             });
             if(res.ok) {
+                setLastSale({ customerName, customerPhone, cart: [...cart], finalTotal });
                 setCart([]); setCustomerName(''); setCustomerPhone('');
                 setSuccessMsg('Invoice generated! 🎉 +5 Gamification Credits added.');
                 setTimeout(() => setSuccessMsg(''), 4000);
@@ -91,14 +93,29 @@ const PosBilling = () => {
     }
 
     const sendWhatsAppReceipt = () => {
-        if (!customerName) return alert("Please enter customer name.");
-        if (!customerPhone) return alert("Please enter customer phone number to send WhatsApp receipt.");
-        if (cart.length === 0) return alert("Cart is empty.");
+        let name = customerName;
+        let phone = customerPhone;
+        let items = cart;
+        let total = finalTotal;
+
+        if (cart.length === 0) {
+            if (lastSale) {
+                name = lastSale.customerName;
+                phone = lastSale.customerPhone;
+                items = lastSale.cart;
+                total = lastSale.finalTotal;
+            } else {
+                return alert("Cart is empty and no recent sale found.");
+            }
+        }
+
+        if (!name) return alert("Please enter customer name.");
+        if (!phone) return alert("Please enter customer phone number to send WhatsApp receipt.");
         
-        const itemNames = cart.map(c => c.name).join(', ');
-        const text = `Hello ${customerName}, thank you for your purchase of ${itemNames} at our shop! Your total cost is ₹${finalTotal.toFixed(2)}. We hope you have a great day and visit us again!`;
+        const itemNames = items.map(c => c.name).join(', ');
+        const text = `Hello ${name}, thank you for your purchase of ${itemNames} at our shop! Your total cost is ₹${total.toFixed(2)}. We hope you have a great day and visit us again!`;
         
-        const url = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(text)}`;
+        const url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
     };
 
