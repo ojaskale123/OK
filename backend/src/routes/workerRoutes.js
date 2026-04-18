@@ -43,8 +43,9 @@ router.post('/', protect, async (req, res) => {
 
         // Record this securely in the History tab
         await ActivityLog.create({
-            userId: req.user._id,
-            action: `Added Worker Staff: ${worker.name} (${worker.email})`
+            user: req.user._id.toString(),
+            actionType: 'WORKER_ADD',
+            description: `Added Worker Staff: ${worker.name} (${worker.email})`
         });
 
         res.status(201).json({ message: 'Worker created successfully', worker: { _id: worker._id, name: worker.name, email: worker.email } });

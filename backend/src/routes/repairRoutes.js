@@ -29,23 +29,27 @@ router.post('/', protect, async (req, res) => {
             shopkeeperId = req.user.employerId;
         } else {
             // Verify plan for shopkeeper
-            const plan = req.user.subscription?.plan;
-            if (plan !== 'Wholesale' && plan !== 'Retail Pro' && req.user._id !== 'master-admin-id') {
-                return res.status(403).json({ message: 'Upgrade plan to manage device repairs' });
-            }
+            // const plan = req.user.subscription?.plan;
+            // if (plan !== 'Wholesale' && plan !== 'Retail Pro' && req.user._id !== 'master-admin-id') {
+            //     return res.status(403).json({ message: 'Upgrade plan to manage device repairs' });
+            // }
         }
 
         const { customerName, customerPhone, deviceModel, issue, workerId } = req.body;
 
-        const newJob = await RepairJob.create({
+        const jobData = {
             customerName,
             customerPhone,
             deviceModel,
             issue,
             shopkeeperId,
-            workerId: workerId || null,
             status: workerId ? 'Assigned' : 'Collected'
-        });
+        };
+        if (workerId) {
+            jobData.workerId = workerId;
+        }
+
+        const newJob = await RepairJob.create(jobData);
 
         res.status(201).json(newJob);
     } catch (error) {

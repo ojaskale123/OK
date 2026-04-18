@@ -16,10 +16,10 @@ const Sidebar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, hidden: isWorker },
     { name: 'POS / Billing', path: '/pos', icon: ShoppingCart },
     { name: 'Inventory', path: '/inventory', icon: Package },
-    { name: 'Device Repairs', path: '/repairs', icon: Zap, locked: plan === 'Shopkeeper' || plan === 'None' },
+    { name: 'Device Repairs', path: '/repairs', icon: Zap, locked: false },
     { name: 'Workers & Staff', path: '/workers', icon: Users, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
     { name: 'Chat Cashbook', path: '/cashbook', icon: BookOpen, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
-    { name: 'WhatsApp Bot', path: '/whatsapp', icon: MessageSquare, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
+    { name: 'WhatsApp Bot', path: '/whatsapp', icon: MessageSquare, locked: false, hidden: isWorker },
     { name: 'Action History', path: '/history', icon: FileText },
 
     { name: 'Profile', path: '/profile', icon: User },

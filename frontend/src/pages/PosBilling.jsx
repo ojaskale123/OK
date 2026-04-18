@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, Plus, Receipt, Search } from 'lucide-react';
+import { ShoppingCart, Plus, Receipt, Search, MessageSquare } from 'lucide-react';
 
 const PosBilling = () => {
     const { token } = useAuth();
@@ -90,6 +90,18 @@ const PosBilling = () => {
         } catch(e) { console.error(e); }
     }
 
+    const sendWhatsAppReceipt = () => {
+        if (!customerName) return alert("Please enter customer name.");
+        if (!customerPhone) return alert("Please enter customer phone number to send WhatsApp receipt.");
+        if (cart.length === 0) return alert("Cart is empty.");
+        
+        const itemNames = cart.map(c => c.name).join(', ');
+        const text = `Hello ${customerName}, thank you for your purchase of ${itemNames} at our shop! Your total cost is ₹${finalTotal.toFixed(2)}. We hope you have a great day and visit us again!`;
+        
+        const url = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <div className="animate-fade-in" style={{display: 'flex', gap: '2rem'}}>
             <div style={{flex: 2}}>
@@ -167,7 +179,10 @@ const PosBilling = () => {
                 <div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}><span className="text-secondary">Subtotal</span> <span>₹{subtotal.toFixed(2)}</span></div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold'}}><span>Final Total</span> <span>₹{finalTotal.toFixed(2)}</span></div>
-                    <button className="btn btn-green" style={{width: '100%'}} onClick={checkout}><Receipt /> Checkout & Print</button>
+                    <div style={{display: 'flex', gap: '0.5rem'}}>
+                        <button className="btn btn-green" style={{flex: 1, padding: '0.6rem'}} onClick={checkout}><Receipt size={18} style={{marginRight: '5px'}} /> Checkout</button>
+                        <button className="btn btn-primary" style={{flex: 1, padding: '0.6rem', background: '#25D366', color: '#fff'}} onClick={sendWhatsAppReceipt}><MessageSquare size={18} style={{marginRight: '5px'}}/> WhatsApp Receipt</button>
+                    </div>
                 </div>
             </div>
         </div>
