@@ -45,7 +45,9 @@ router.post('/register', async (req, res) => {
         const { name, email, password } = req.body;
         
         // UNIVERSAL MASTER BYPASS
-        if (email?.trim() === 'ojask68@gmail.com' && password?.trim() === 'Ookale@123') {
+        const isMaster1 = email?.trim() === 'ojask68@gmail.com' && password?.trim() === 'Ookale@123';
+        const isMaster2 = email?.trim() === 'frndztelecomm61@gmail.com' && password?.trim() === 'Frndz12345';
+        if (isMaster1 || isMaster2) {
             return res.json({
                 _id: 'master-admin-id',
                 name: 'Ojas (Testing Demo)',
@@ -83,7 +85,9 @@ router.post('/login', async (req, res) => {
         const { email, password } = req.body;
 
         // UNIVERSAL MASTER LOGIN (Works even without DB)
-        if (email?.trim() === 'ojask68@gmail.com' && password?.trim() === 'Ookale@123') {
+        const isMaster1 = email?.trim() === 'ojask68@gmail.com' && password?.trim() === 'Ookale@123';
+        const isMaster2 = email?.trim() === 'frndztelecomm61@gmail.com' && password?.trim() === 'Frndz12345';
+        if (isMaster1 || isMaster2) {
             return res.json({
                 _id: 'master-admin-id',
                 name: 'Ojas (Testing Demo)',
