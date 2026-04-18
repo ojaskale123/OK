@@ -32,8 +32,10 @@ router.post('/', protect, async (req, res) => {
             metadata: { billId: bill._id, finalTotal: bill.finalTotal, customerName, customerPhone, items, subtotal, discountApplied }
         });
 
-        req.user.walletBalance += 5;
-        await req.user.save();
+        if (typeof req.user.save === 'function') {
+            req.user.walletBalance = (req.user.walletBalance || 0) + 5;
+            await req.user.save();
+        }
         
         res.status(201).json(bill);
     } catch(err) {
