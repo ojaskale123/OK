@@ -24,6 +24,17 @@ const PosBilling = () => {
             alert("Item is out of stock!");
             return;
         }
+
+        if (product.category === 'Batteries' && product.mfgDate) {
+            const mfg = new Date(product.mfgDate);
+            const expiry = new Date(mfg.setFullYear(mfg.getFullYear() + 1));
+            const isExpired = new Date() > expiry;
+            if (isExpired) {
+                if (!window.confirm(`⚠️ WARNING: This battery (${product.name}) is EXPIRED! Are you absolutely sure you want to sell it?`)) {
+                    return;
+                }
+            }
+        }
         
         // Determine the price based on the current billing mode
         const activePrice = billingMode === 'Retailer' ? (product.retailerPrice || product.price) : product.price;

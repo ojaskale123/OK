@@ -22,10 +22,10 @@ router.get('/', protect, async (req, res) => {
 
 router.post('/', protect, async (req, res) => {
     try {
-        const { name, barcode, buyPrice, price, retailerPrice, stockQuantity, thresholdAlert, category, image } = req.body;
+        const { name, barcode, buyPrice, price, retailerPrice, stockQuantity, thresholdAlert, category, image, mfgDate } = req.body;
         
         if (req.user._id === 'master-admin-id') {
-            const np = { _id: Date.now().toString(), name, barcode, category, image, buyPrice: Number(buyPrice||0), price: Number(price), retailerPrice: retailerPrice ? Number(retailerPrice) : Number(price), stockQuantity: Number(stockQuantity), thresholdAlert: 10, user: 'master-admin-id' };
+            const np = { _id: Date.now().toString(), name, barcode, category, image, buyPrice: Number(buyPrice||0), price: Number(price), retailerPrice: retailerPrice ? Number(retailerPrice) : Number(price), stockQuantity: Number(stockQuantity), thresholdAlert: 10, user: 'master-admin-id', mfgDate: mfgDate || null };
             masterProducts.push(np);
             global.masterLogs = global.masterLogs || [];
             global.masterLogs.push({
@@ -53,7 +53,7 @@ router.post('/', protect, async (req, res) => {
 
         const product = new Product({
             user: req.user._id,
-            barcode, name, buyPrice, price, retailerPrice, stockQuantity, thresholdAlert, category, image
+            barcode, name, buyPrice, price, retailerPrice, stockQuantity, thresholdAlert, category, image, mfgDate
         });
         const createdProduct = await product.save();
         
@@ -70,12 +70,12 @@ router.post('/', protect, async (req, res) => {
 
 router.put('/:id', protect, async (req, res) => {
     try {
-        const { name, barcode, buyPrice, price, retailerPrice, stockQuantity, category, image } = req.body;
+        const { name, barcode, buyPrice, price, retailerPrice, stockQuantity, category, image, mfgDate } = req.body;
         
         if (req.user._id === 'master-admin-id') {
             const index = masterProducts.findIndex(p => p._id === req.params.id);
             if(index !== -1) {
-                masterProducts[index] = { ...masterProducts[index], name: name || masterProducts[index].name, category: category ?? masterProducts[index].category, image: image ?? masterProducts[index].image, barcode: barcode ?? masterProducts[index].barcode, buyPrice: buyPrice ?? masterProducts[index].buyPrice, price: price ?? masterProducts[index].price, retailerPrice: retailerPrice ?? masterProducts[index].retailerPrice, stockQuantity: stockQuantity ?? masterProducts[index].stockQuantity };
+                masterProducts[index] = { ...masterProducts[index], name: name || masterProducts[index].name, category: category ?? masterProducts[index].category, image: image ?? masterProducts[index].image, barcode: barcode ?? masterProducts[index].barcode, buyPrice: buyPrice ?? masterProducts[index].buyPrice, price: price ?? masterProducts[index].price, retailerPrice: retailerPrice ?? masterProducts[index].retailerPrice, stockQuantity: stockQuantity ?? masterProducts[index].stockQuantity, mfgDate: mfgDate !== undefined ? mfgDate : masterProducts[index].mfgDate };
                 global.masterLogs = global.masterLogs || [];
                 global.masterLogs.push({
                     _id: Date.now().toString(), date: new Date().toISOString(),
@@ -98,6 +98,7 @@ router.put('/:id', protect, async (req, res) => {
         if(category !== undefined) product.category = category;
         if(image !== undefined) product.image = image;
         if(retailerPrice !== undefined) product.retailerPrice = retailerPrice;
+        if(mfgDate !== undefined) product.mfgDate = mfgDate;
         
         await product.save();
         

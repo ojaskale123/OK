@@ -18,6 +18,7 @@ const Inventory = () => {
     const [price, setPrice] = useState(''); // Customer Price
     const [retailerPrice, setRetailerPrice] = useState(''); // Retailer Price
     const [stock, setStock] = useState('');
+    const [mfgDate, setMfgDate] = useState('');
     
     const [editProductId, setEditProductId] = useState(null);
     const [editForm, setEditForm] = useState({});
@@ -56,13 +57,13 @@ const Inventory = () => {
             const res = await fetch('https://ok-ax2v.onrender.com/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ name, barcode, category, image, buyPrice: Number(buyPrice), price: Number(price), retailerPrice: Number(retailerPrice || price), stockQuantity: Number(stock) })
+                body: JSON.stringify({ name, barcode, category, image, buyPrice: Number(buyPrice), price: Number(price), retailerPrice: Number(retailerPrice || price), stockQuantity: Number(stock), mfgDate: category === 'Batteries' ? mfgDate : undefined })
             });
             const data = await res.json();
             if(!res.ok) throw new Error(data.message);
             
             setProducts([...products, data]);
-            setName(''); setBarcode(''); setCategory('Others'); setImage(''); setBuyPrice(''); setPrice(''); setRetailerPrice(''); setStock('');
+            setName(''); setBarcode(''); setCategory('Others'); setImage(''); setBuyPrice(''); setPrice(''); setRetailerPrice(''); setStock(''); setMfgDate('');
         } catch(err) {
             setError(err.message);
         }
@@ -70,7 +71,7 @@ const Inventory = () => {
 
     const startEdit = (p) => {
         setEditProductId(p._id);
-        setEditForm({ name: p.name, barcode: p.barcode, category: p.category, image: p.image, buyPrice: p.buyPrice, price: p.price, retailerPrice: p.retailerPrice || p.price, stockQuantity: p.stockQuantity });
+        setEditForm({ name: p.name, barcode: p.barcode, category: p.category, image: p.image, buyPrice: p.buyPrice, price: p.price, retailerPrice: p.retailerPrice || p.price, stockQuantity: p.stockQuantity, mfgDate: p.mfgDate ? new Date(p.mfgDate).toISOString().split('T')[0] : '' });
     }
 
     const saveEdit = async (id) => {
@@ -157,6 +158,13 @@ const Inventory = () => {
                             </select>
                         </div>
 
+                        {category === 'Batteries' && (
+                            <div className="form-group" style={{animation: 'fadeIn 0.2s ease'}}>
+                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Manufacturing Date</label>
+                                <input type="date" className="form-input" value={mfgDate} onChange={e=>setMfgDate(e.target.value)} required />
+                            </div>
+                        )}
+
                         <div style={{display: 'flex', gap: '0.5rem'}}>
                             <div className="form-group" style={{flex: 1}}>
                                 <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Buy Price (₹)</label>
@@ -206,6 +214,9 @@ const Inventory = () => {
                                         <select className="form-input" style={{marginBottom: '0.5rem', padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.category} onChange={e=>setEditForm({...editForm, category: e.target.value})}>
                                             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
+                                        {editForm.category === 'Batteries' && (
+                                            <input type="date" className="form-input" style={{marginBottom: '0.5rem', padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.mfgDate} onChange={e=>setEditForm({...editForm, mfgDate: e.target.value})} />
+                                        )}
                                         <div style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem'}}>
                                             <input type="number" placeholder="Buy" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.buyPrice} onChange={e=>setEditForm({...editForm, buyPrice: e.target.value})} />
                                             <input type="number" placeholder="Cust." className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} />
@@ -235,7 +246,19 @@ const Inventory = () => {
                                                 <div style={{fontWeight: 600, color: '#fff', fontSize: '1rem', lineHeight: 1.2}}>{p.name}</div>
                                                 <div className="text-secondary" style={{fontSize: '0.75rem', marginTop: '4px'}}>{p.category}</div>
                                             </div>
-                                            <div className="amount-receive" style={{fontSize: '0.75rem', padding: '2px 6px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', fontWeight: 'bold'}}>+{marginPercent}%</div>
+                                            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px'}}>
+                                                <div className="amount-receive" style={{fontSize: '0.75rem', padding: '2px 6px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', fontWeight: 'bold'}}>+{marginPercent}%</div>
+                                                {p.category === 'Batteries' && p.mfgDate && (() => {
+                                                    const mfg = new Date(p.mfgDate);
+                                                    const expiry = new Date(mfg.setFullYear(mfg.getFullYear() + 1));
+                                                    const isExpired = new Date() > expiry;
+                                                    return isExpired ? (
+                                                        <div style={{fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255, 60, 60, 0.2)', color: 'var(--ok-red)', borderRadius: '12px', fontWeight: 'bold', animation: 'pulse 2s infinite'}}>EXPIRED!</div>
+                                                    ) : (
+                                                        <div style={{fontSize: '0.65rem', color: 'var(--text-secondary)'}}>Exp: {expiry.toLocaleDateString(undefined, {month:'short', year:'numeric'})}</div>
+                                                    );
+                                                })()}
+                                            </div>
                                         </div>
                                         
                                         <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '1rem'}}>

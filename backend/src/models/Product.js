@@ -10,7 +10,8 @@ const productSchema = new mongoose.Schema({
     stockQuantity: { type: Number, required: true },
     thresholdAlert: { type: Number, default: 5 },
     category: { type: String, default: 'Others' },
-    image: { type: String, default: '' }
+    image: { type: String, default: '' },
+    mfgDate: { type: Date, required: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);
