@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Zap, Plus, Phone, Send, User } from 'lucide-react';
+import { Zap, Plus, Phone, Send, User, CheckCircle } from 'lucide-react';
 
 const RepairManagement = () => {
   const { token, user } = useAuth();
@@ -184,6 +184,21 @@ const RepairManagement = () => {
                             />
                         </div>
                     </div>
+
+                    {viewingJob.status !== 'Completed' && (
+                        <button 
+                            className="btn btn-primary" 
+                            style={{ width: '100%', marginTop: '1.5rem', background: 'var(--ok-green)', color: 'white', border: 'none', fontWeight: 'bold' }}
+                            onClick={() => {
+                                updateJob(viewingJob._id, { status: 'Completed', costing: viewingJob.costing });
+                                setViewingJob({...viewingJob, status: 'Completed'});
+                                setTransferringJobId(null);
+                            }}
+                        >
+                            <CheckCircle size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '5px' }} />
+                            Mark Task as Complete
+                        </button>
+                    )}
                 </div>
             </div>
         )}
