@@ -9,6 +9,7 @@ const RepairManagement = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [transferringJobId, setTransferringJobId] = useState(null);
+  const [viewingJob, setViewingJob] = useState(null);
   
   const [formData, setFormData] = useState({
       customerName: '', customerPhone: '', deviceModel: '', issue: '', workerId: ''
@@ -128,6 +129,65 @@ const RepairManagement = () => {
             </div>
         )}
 
+        {viewingJob && (
+            <div className="modal-overlay" style={{position: 'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.9)', zIndex: 1000, display:'flex', justifyContent:'center', alignItems:'center'}}>
+                <div className="glass-card" style={{ width: '600px', maxWidth: '90%', position: 'relative', padding: '2rem' }}>
+                    <button onClick={() => setViewingJob(null)} style={{position: 'absolute', top: '15px', right: '20px', background:'none', border:'none', color:'white', fontSize:'2rem', cursor:'pointer'}}>&times;</button>
+                    
+                    <h2 className="text-gradient" style={{ marginBottom: '1.5rem' }}>Job Details: {viewingJob.deviceModel}</h2>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem' }}>Customer Name</p>
+                            <p style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{viewingJob.customerName}</p>
+                        </div>
+                        <div>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem' }}>Customer Phone</p>
+                            <p style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{viewingJob.customerPhone}</p>
+                        </div>
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <p className="text-secondary" style={{ fontSize: '0.85rem' }}>Issue Description</p>
+                            <div className="glass-card" style={{ padding: '1rem', marginTop: '0.5rem', background: 'rgba(255,255,255,0.05)' }}>
+                                {viewingJob.issue}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <label className="text-secondary" style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>Update Status</label>
+                            <select 
+                                value={viewingJob.status} 
+                                onChange={e => {
+                                    updateJob(viewingJob._id, { status: e.target.value });
+                                    setViewingJob({...viewingJob, status: e.target.value});
+                                }}
+                                className="neon-input"
+                                style={{ background: 'rgba(0,0,0,0.5)', width: '100%', borderColor: getStatusColor(viewingJob.status), color: getStatusColor(viewingJob.status), fontWeight: 'bold' }}
+                            >
+                                <option value="Collected">Collected</option>
+                                <option value="Assigned">Assigned</option>
+                                <option value="In Repair">In Repair</option>
+                                <option value="Ready">Ready</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label className="text-secondary" style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>Final Costing (₹)</label>
+                            <input 
+                                type="number" 
+                                className="neon-input"
+                                value={viewingJob.costing || 0} 
+                                onChange={(e) => setViewingJob({...viewingJob, costing: Number(e.target.value)})}
+                                onBlur={(e) => updateJob(viewingJob._id, { costing: Number(e.target.value) })}
+                                style={{ width: '100%' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
         <div className="glass-card" style={{ padding: '0' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
@@ -186,13 +246,25 @@ const RepairManagement = () => {
                                                 <>
                                                     <span style={{color: 'var(--text-secondary)'}}>{job.workerId?.name || 'Unassigned'}</span>
                                                     {!job.workerId ? (
-                                                        <button onClick={() => updateJob(job._id, { workerId: user._id })} className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(139, 92, 246, 0.4)' }}>
+                                                        <button onClick={() => {
+                                                            const activeJobs = jobs.filter(j => j.workerId?._id === user._id && !['Ready', 'Completed'].includes(j.status));
+                                                            if (activeJobs.length > 0) {
+                                                                alert('Please complete your current active job before accepting a new one!');
+                                                                return;
+                                                            }
+                                                            updateJob(job._id, { workerId: user._id });
+                                                        }} className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(139, 92, 246, 0.4)' }}>
                                                             Accept Job
                                                         </button>
                                                     ) : (
-                                                        <button onClick={() => setTransferringJobId(job._id)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)' }}>
-                                                            Transfer
-                                                        </button>
+                                                        <>
+                                                            <button onClick={() => setViewingJob(job)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--neon-blue)', color: 'var(--neon-blue)', marginRight: '4px' }}>
+                                                                Open Task
+                                                            </button>
+                                                            <button onClick={() => setTransferringJobId(job._id)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)' }}>
+                                                                Transfer
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </>
                                             )}
