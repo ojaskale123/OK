@@ -185,7 +185,15 @@ const RepairManagement = () => {
                                             ) : (
                                                 <>
                                                     <span style={{color: 'var(--text-secondary)'}}>{job.workerId?.name || 'Unassigned'}</span>
-                                                    <button onClick={() => setTransferringJobId(job._id)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)' }}>Transfer</button>
+                                                    {!job.workerId ? (
+                                                        <button onClick={() => updateJob(job._id, { workerId: user._id })} className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(139, 92, 246, 0.4)' }}>
+                                                            Accept Job
+                                                        </button>
+                                                    ) : (
+                                                        <button onClick={() => setTransferringJobId(job._id)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)' }}>
+                                                            Transfer
+                                                        </button>
+                                                    )}
                                                 </>
                                             )}
                                         </div>
