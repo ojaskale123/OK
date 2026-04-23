@@ -11,6 +11,7 @@ const Sidebar = () => {
   const plan = user?.subscription?.plan || 'None';
 
     const isWorker = user?.role === 'worker';
+    const isMaster = user?._id === 'master-admin-id' || user?.email === 'ojask68@gmail.com' || user?.email === 'frndztelecomm61@gmail.com';
 
     const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, hidden: isWorker },
@@ -56,12 +57,13 @@ const Sidebar = () => {
         })}
       </nav>
       
-      <div className="sidebar-footer" style={{marginTop: '1rem'}}>
-        <Link to="/plans" className="btn btn-primary" style={{width: '100%', marginBottom: '1rem', padding: '0.5rem', fontSize: '0.8rem'}}>
-            <Crown size={16} /> Manage Plan
-        </Link>
-
-      </div>
+      {!isWorker && !isMaster && (
+        <div className="sidebar-footer" style={{marginTop: '1rem'}}>
+          <Link to="/plans" className="btn btn-primary" style={{width: '100%', marginBottom: '1rem', padding: '0.5rem', fontSize: '0.8rem'}}>
+              <Crown size={16} /> Manage Plan
+          </Link>
+        </div>
+      )}
     </aside>
   );
 };

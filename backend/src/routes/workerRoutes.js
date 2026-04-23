@@ -8,7 +8,7 @@ const { protect } = require('../middleware/authMiddleware');
 router.get('/', protect, async (req, res) => {
     try {
         // Find all users whose employerId matches the logged in user
-        const workers = await User.find({ employerId: req.user._id, role: 'worker' }).select('-password');
+        const workers = await User.find({ employerId: req.user.ownerId, role: 'worker' }).select('-password');
         res.json(workers);
     } catch (error) {
         console.error(error);
@@ -38,12 +38,12 @@ router.post('/', protect, async (req, res) => {
             email,
             password,
             role: 'worker',
-            employerId: req.user._id
+            employerId: req.user.ownerId
         });
 
         // Record this securely in the History tab
         await ActivityLog.create({
-            user: req.user._id.toString(),
+            user: req.user.ownerId.toString(),
             actionType: 'WORKER_ADD',
             description: `Added Worker Staff: ${worker.name} (${worker.email})`
         });

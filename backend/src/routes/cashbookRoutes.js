@@ -15,7 +15,7 @@ router.get('/persons', protect, async (req, res) => {
     if(plan === 'Shopkeeper' || plan === 'None') {
         return res.status(403).json({ message: "Cashbook requires Wholesale or Retail Pro plan." });
     }
-    const persons = await CashbookPerson.find({ user: req.user._id });
+    const persons = await CashbookPerson.find({ user: req.user.ownerId });
     res.json(persons);
 });
 
@@ -29,14 +29,14 @@ router.post('/persons', protect, async (req, res) => {
     }
 
     const person = await CashbookPerson.create({
-        user: req.user._id,
+        user: req.user.ownerId,
         name: req.body.name,
         contact: req.body.contact,
         netBalance: 0
     });
     
     await ActivityLog.create({
-        user: req.user._id.toString(), actionType: 'CASHBOOK_PERSON_ADD', description: `Added Person to Cashbook: ${req.body.name}`,
+        user: req.user.ownerId.toString(), actionType: 'CASHBOOK_PERSON_ADD', description: `Added Person to Cashbook: ${req.body.name}`,
         metadata: { personId: person._id, name: req.body.name }
     });
 
@@ -48,7 +48,7 @@ router.get('/transactions/:personId', protect, async (req, res) => {
     if (req.user._id === 'master-admin-id') {
          return res.json(masterTxns.filter(t => t.person === req.params.personId));
     }
-    const tx = await CashbookTransaction.find({ user: req.user._id, person: req.params.personId }).sort({ date: 1 });
+    const tx = await CashbookTransaction.find({ user: req.user.ownerId, person: req.params.personId }).sort({ date: 1 });
     res.json(tx);
 });
 
@@ -71,7 +71,7 @@ router.post('/transactions', protect, async (req, res) => {
     }
 
     const tx = await CashbookTransaction.create({
-        user: req.user._id,
+        user: req.user.ownerId,
         person: personId,
         amount, type, note
     });
@@ -87,7 +87,7 @@ router.post('/transactions', protect, async (req, res) => {
     await person.save();
 
     await ActivityLog.create({
-        user: req.user._id.toString(), actionType: 'CASHBOOK_TXN_ADD', description: `Cashbook ${type === 'receive' ? 'Received from' : 'Given to'} ${person.name}: ₹${amount}`,
+        user: req.user.ownerId.toString(), actionType: 'CASHBOOK_TXN_ADD', description: `Cashbook ${type === 'receive' ? 'Received from' : 'Given to'} ${person.name}: ₹${amount}`,
         metadata: { personId, transactionId: tx._id, amount, type, note }
     });
 

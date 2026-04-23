@@ -13,7 +13,7 @@ let masterProducts = [
 router.get('/', protect, async (req, res) => {
     try {
         if (req.user._id === 'master-admin-id') return res.json(masterProducts);
-        const products = await Product.find({ user: req.user._id });
+        const products = await Product.find({ user: req.user.ownerId });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
@@ -38,7 +38,7 @@ router.post('/', protect, async (req, res) => {
 
         // Inventory Limit Logic based on Subscription
         const plan = req.user.subscription.plan;
-        const currentProducts = await Product.countDocuments({ user: req.user._id });
+        const currentProducts = await Product.countDocuments({ user: req.user.ownerId });
         
         let maxLimit = 10; // Free limit
         if(plan === 'Shopkeeper') maxLimit = 1000;
@@ -52,13 +52,13 @@ router.post('/', protect, async (req, res) => {
         }
 
         const product = new Product({
-            user: req.user._id,
+            user: req.user.ownerId,
             barcode, name, buyPrice, price, retailerPrice, stockQuantity, thresholdAlert, category, image, mfgDate
         });
         const createdProduct = await product.save();
         
         await ActivityLog.create({
-            user: req.user._id.toString(), actionType: 'PRODUCT_ADD', description: `Added Stock: ${name}`,
+            user: req.user.ownerId.toString(), actionType: 'PRODUCT_ADD', description: `Added Stock: ${name}`,
             metadata: { productId: createdProduct._id, name, barcode, stockQuantity }
         });
 
@@ -88,7 +88,7 @@ router.put('/:id', protect, async (req, res) => {
         }
 
         const product = await Product.findById(req.params.id);
-        if(!product || product.user.toString() !== req.user._id.toString()) return res.status(401).json({message: "Not allowed"});
+        if(!product || product.user.toString() !== req.user.ownerId.toString()) return res.status(401).json({message: "Not allowed"});
         
         if(name) product.name = name;
         if(barcode !== undefined) product.barcode = barcode;
@@ -103,7 +103,7 @@ router.put('/:id', protect, async (req, res) => {
         await product.save();
         
         await ActivityLog.create({
-            user: req.user._id.toString(), actionType: 'PRODUCT_EDIT', description: `Edited Item: ${product.name}`,
+            user: req.user.ownerId.toString(), actionType: 'PRODUCT_EDIT', description: `Edited Item: ${product.name}`,
             metadata: { productId: product._id, name: product.name, stockQuantity: product.stockQuantity }
         });
 
@@ -129,7 +129,7 @@ router.delete('/:id', protect, async (req, res) => {
         }
 
         const product = await Product.findById(req.params.id);
-        if(!product || product.user.toString() !== req.user._id.toString()) {
+        if(!product || product.user.toString() !== req.user.ownerId.toString()) {
             return res.status(401).json({message: "Not allowed"});
         }
         
@@ -137,7 +137,7 @@ router.delete('/:id', protect, async (req, res) => {
         await Product.findByIdAndDelete(req.params.id);
 
         await ActivityLog.create({
-            user: req.user._id.toString(), actionType: 'PRODUCT_DELETE', description: `Deleted Item: ${deletedName}`, metadata: {}
+            user: req.user.ownerId.toString(), actionType: 'PRODUCT_DELETE', description: `Deleted Item: ${deletedName}`, metadata: {}
         });
 
         res.json({ message: "Product removed" });

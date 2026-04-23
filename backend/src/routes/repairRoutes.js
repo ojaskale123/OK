@@ -75,7 +75,7 @@ router.put('/:id', protect, async (req, res) => {
             
             if (isCompletingNow) {
                 await ActivityLog.create({
-                    user: req.user._id.toString(),
+                    user: req.user.ownerId.toString(),
                     actionType: 'REPAIR_JOB_COMPLETE',
                     description: `Repair Job Completed for ${job.deviceModel}`,
                     metadata: {

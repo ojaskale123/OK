@@ -23,12 +23,12 @@ router.post('/', protect, async (req, res) => {
         }
 
         const bill = await Bill.create({
-            user: req.user._id,
+            user: req.user.ownerId,
             customerName, customerPhone, items, subtotal, discountApplied, finalTotal
         });
         
         await ActivityLog.create({
-            user: req.user._id.toString(), actionType: 'POS_BILL', description: `Created Bill for ${customerName}`,
+            user: req.user.ownerId.toString(), actionType: 'POS_BILL', description: `Created Bill for ${customerName}`,
             metadata: { billId: bill._id, finalTotal: bill.finalTotal, customerName, customerPhone, items, subtotal, discountApplied }
         });
 
@@ -45,7 +45,7 @@ router.post('/', protect, async (req, res) => {
 
 router.get('/', protect, async (req, res) => {
     if (req.user._id === 'master-admin-id') return res.json([...masterBills].reverse());
-    const bills = await Bill.find({ user: req.user._id }).sort({ date: -1 });
+    const bills = await Bill.find({ user: req.user.ownerId }).sort({ date: -1 });
     res.json(bills);
 });
 

@@ -102,13 +102,22 @@ router.post('/login', async (req, res) => {
         const user = await User.findOne({ email });
 
         if (user && (await bcrypt.compare(password, user.password))) {
+            let subscription = user.subscription;
+            if (user.role === 'worker' && user.employerId) {
+                if (user.employerId.toString() === '000000000000000000000000') {
+                    subscription = { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true };
+                } else {
+                    const employer = await User.findById(user.employerId).select('subscription');
+                    if (employer) subscription = employer.subscription;
+                }
+            }
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
                 token: generateToken(user._id),
-                subscription: user.subscription,
+                subscription: subscription,
                 walletBalance: user.walletBalance
             });
         } else {

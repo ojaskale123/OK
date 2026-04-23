@@ -20,6 +20,21 @@ const protect = async (req, res, next) => {
             }
 
             req.user = await User.findById(decoded.id).select('-password');
+            if (req.user) {
+                if (req.user.role === 'worker' && req.user.employerId) {
+                    req.user.ownerId = req.user.employerId;
+                    if (req.user.employerId.toString() === '000000000000000000000000') {
+                        req.user.subscription = { plan: 'Retail Pro', isActive: true };
+                    } else {
+                        const employer = await User.findById(req.user.employerId).select('subscription');
+                        if (employer) {
+                            req.user.subscription = employer.subscription;
+                        }
+                    }
+                } else {
+                    req.user.ownerId = req.user._id;
+                }
+            }
             next();
         } catch (error) {
             res.status(401).json({ message: 'Not authorized, token failed' });

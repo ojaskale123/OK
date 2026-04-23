@@ -8,6 +8,9 @@ const Subscription = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const isWorker = user?.role === 'worker';
+    const isMaster = user?._id === 'master-admin-id' || user?.email === 'ojask68@gmail.com' || user?.email === 'frndztelecomm61@gmail.com';
+
     const plans = [
         { 
             name: 'Shopkeeper', 
@@ -126,6 +129,25 @@ const Subscription = () => {
         }
         setLoading(false);
     };
+
+    if (isWorker || isMaster) {
+        return (
+            <div className="animate-fade-in" style={{textAlign: 'center', marginTop: '5rem'}}>
+                <ShieldCheck size={64} color="var(--neon-purple)" style={{margin: '0 auto 2rem'}} />
+                <h2 className="text-gradient" style={{fontSize: '2rem', marginBottom: '1rem'}}>
+                    {isMaster ? 'Master Admin Account' : 'Worker Account Active'}
+                </h2>
+                <p className="text-secondary" style={{fontSize: '1.2rem'}}>
+                    {isMaster 
+                        ? 'You have unlimited lifetime access. No subscription required.'
+                        : 'Your subscription is managed by your shop owner. You have free access!'}
+                </p>
+                <button className="btn btn-primary" onClick={() => navigate('/dashboard')} style={{marginTop: '2rem', padding: '0.8rem 2rem'}}>
+                    Return to Dashboard
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="animate-fade-in">

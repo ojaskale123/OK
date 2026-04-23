@@ -8,6 +8,7 @@ const RepairManagement = () => {
   const [workers, setWorkers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [transferringJobId, setTransferringJobId] = useState(null);
   
   const [formData, setFormData] = useState({
       customerName: '', customerPhone: '', deviceModel: '', issue: '', workerId: ''
@@ -25,7 +26,6 @@ const RepairManagement = () => {
   };
 
   const fetchWorkers = async () => {
-      if(isWorker) return;
       try {
           const res = await fetch('https://ok-ax2v.onrender.com/api/workers', {
               headers: { 'Authorization': `Bearer ${token}` }
@@ -118,12 +118,10 @@ const RepairManagement = () => {
                         <input className="neon-input" required type="text" placeholder="Customer Phone" value={formData.customerPhone} onChange={e => setFormData({...formData, customerPhone: e.target.value})} />
                         <input className="neon-input" required type="text" placeholder="Device Model" value={formData.deviceModel} onChange={e => setFormData({...formData, deviceModel: e.target.value})} />
                         <input className="neon-input" required type="text" placeholder="Issue Description" value={formData.issue} onChange={e => setFormData({...formData, issue: e.target.value})} />
-                        {!isWorker && (
-                            <select className="neon-input" style={{background: 'rgba(0,0,0,0.5)'}} value={formData.workerId} onChange={e => setFormData({...formData, workerId: e.target.value})}>
-                                <option value="">-- Unassigned --</option>
-                                {workers.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
-                            </select>
-                        )}
+                        <select className="neon-input" style={{background: 'rgba(0,0,0,0.5)'}} value={formData.workerId} onChange={e => setFormData({...formData, workerId: e.target.value})}>
+                            <option value="">-- Unassigned --</option>
+                            {workers.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
+                        </select>
                         <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Saving...' : 'Add Job'}</button>
                     </form>
                 </div>
@@ -169,7 +167,28 @@ const RepairManagement = () => {
                                             {workers.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
                                         </select>
                                     ) : (
-                                        <span style={{color: 'var(--text-secondary)'}}>{job.workerId?.name || 'Unassigned'}</span>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                            {transferringJobId === job._id ? (
+                                                <select 
+                                                    value={job.workerId?._id || ''} 
+                                                    onChange={e => {
+                                                        updateJob(job._id, { workerId: e.target.value });
+                                                        setTransferringJobId(null);
+                                                    }}
+                                                    style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--border-color)', color: 'white', padding: '4px', borderRadius: '4px' }}
+                                                    autoFocus
+                                                    onBlur={() => setTransferringJobId(null)}
+                                                >
+                                                    <option value="">-- Transfer To --</option>
+                                                    {workers.map(w => <option key={w._id} value={w._id}>{w.name}</option>)}
+                                                </select>
+                                            ) : (
+                                                <>
+                                                    <span style={{color: 'var(--text-secondary)'}}>{job.workerId?.name || 'Unassigned'}</span>
+                                                    <button onClick={() => setTransferringJobId(job._id)} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)' }}>Transfer</button>
+                                                </>
+                                            )}
+                                        </div>
                                     )}
                                 </td>
                                 <td style={{ padding: '1rem' }}>

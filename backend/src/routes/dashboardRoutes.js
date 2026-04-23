@@ -7,7 +7,7 @@ const { protect } = require('../middleware/authMiddleware');
 
 router.get('/stats', protect, async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.ownerId;
 
         // Note: The master-admin-id operates with mock memory arrays in testing,
         // so real aggregations in MongoDB may inherently return 0 for it unless seeded.
