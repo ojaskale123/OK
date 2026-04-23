@@ -102,7 +102,7 @@ const RepairManagement = () => {
     <div className="animate-fade-in" style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <h2 className="text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Zap size={28} /> Device Repairs
+                <Zap size={28} /> Device Repairs (Live)
             </h2>
             <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Plus size={18} /> New Repair Job
