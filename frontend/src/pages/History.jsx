@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ScrollText, FileSpreadsheet, Hash, Package, Wallet, ShieldCheck, Box, UserPlus, ArrowRightLeft } from 'lucide-react';
+import { ScrollText, FileSpreadsheet, Hash, Package, Wallet, ShieldCheck, Box, UserPlus, ArrowRightLeft, CheckCircle } from 'lucide-react';
 
 const History = () => {
     const { token } = useAuth();
@@ -102,6 +102,7 @@ const History = () => {
                         if (log.actionType === 'PRODUCT_EDIT') { Icon = Package; iconColor = '#f59e0b'; iconBg = 'rgba(245, 158, 11, 0.1)'; }
                         if (log.actionType === 'CASHBOOK_PERSON_ADD') { Icon = UserPlus; iconColor = '#6366f1'; iconBg = 'rgba(99, 102, 241, 0.1)'; }
                         if (log.actionType === 'CASHBOOK_TXN_ADD') { Icon = ArrowRightLeft; iconColor = '#ec4899'; iconBg = 'rgba(236, 72, 153, 0.1)'; }
+                        if (log.actionType === 'REPAIR_JOB_COMPLETE') { Icon = CheckCircle; iconColor = '#a855f7'; iconBg = 'rgba(168, 85, 247, 0.1)'; }
 
                         return (
                             <div key={log._id} className="glass-card" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem'}}>
@@ -115,6 +116,7 @@ const History = () => {
                                             {log.actionType === 'PRODUCT_ADD' && `Stock Set: ${log.metadata?.stockQuantity}`}
                                             {log.actionType === 'PRODUCT_EDIT' && `Updated Stock/Details`}
                                             {log.actionType === 'CASHBOOK_TXN_ADD' && `Type: ${log.metadata?.type?.toUpperCase()} | Amount: ₹${log.metadata?.amount}`}
+                                            {log.actionType === 'REPAIR_JOB_COMPLETE' && `Customer: ${log.metadata?.customerName} | Costing: ₹${log.metadata?.costing || 0}`}
                                         </div>
                                     </div>
                                 </div>

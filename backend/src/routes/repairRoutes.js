@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const RepairJob = require('../models/RepairJob');
+const ActivityLog = require('../models/ActivityLog');
 const { protect } = require('../middleware/authMiddleware');
 
 // Get repair jobs. If shopkeeper, show all their shop jobs. If worker, show assigned or all depending on rules. Let's make it show all jobs for their shopkeeper.
@@ -68,7 +69,24 @@ router.put('/:id', protect, async (req, res) => {
             return res.status(404).json({ message: 'Job not found' });
         }
 
-        if (status) job.status = status;
+        if (status) {
+            const isCompletingNow = status === 'Completed' && job.status !== 'Completed';
+            job.status = status;
+            
+            if (isCompletingNow) {
+                await ActivityLog.create({
+                    user: req.user._id.toString(),
+                    actionType: 'REPAIR_JOB_COMPLETE',
+                    description: `Repair Job Completed for ${job.deviceModel}`,
+                    metadata: {
+                        jobId: job._id,
+                        customerName: job.customerName,
+                        deviceModel: job.deviceModel,
+                        costing: job.costing || 0
+                    }
+                });
+            }
+        }
         if (costing !== undefined) job.costing = costing;
         if (workerId) {
             job.workerId = workerId;

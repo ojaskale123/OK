@@ -4,7 +4,7 @@ const activityLogSchema = new mongoose.Schema({
     user: { type: String, required: true }, // Using String to accommodate 'master-admin-id'
     actionType: { 
         type: String, 
-        enum: ['POS_BILL', 'PRODUCT_ADD', 'PRODUCT_EDIT', 'PRODUCT_DELETE', 'CASHBOOK_PERSON_ADD', 'CASHBOOK_TXN_ADD', 'WORKER_ADD', 'REPAIR_JOB_ADD'],
+        enum: ['POS_BILL', 'PRODUCT_ADD', 'PRODUCT_EDIT', 'PRODUCT_DELETE', 'CASHBOOK_PERSON_ADD', 'CASHBOOK_TXN_ADD', 'WORKER_ADD', 'REPAIR_JOB_ADD', 'REPAIR_JOB_COMPLETE'],
         required: true
     },
     description: { type: String, required: true },
