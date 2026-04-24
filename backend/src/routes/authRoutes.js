@@ -48,12 +48,13 @@ router.post('/register', async (req, res) => {
         const isMaster1 = email?.trim() === 'ojask68@gmail.com' && password?.trim() === 'Ookale@123';
         const isMaster2 = email?.trim() === 'frndztelecomm61@gmail.com' && password?.trim() === 'Frndz12345';
         if (isMaster1 || isMaster2) {
+            const masterId = isMaster1 ? 'master-admin-id' : 'master-admin-id-2';
             return res.json({
-                _id: 'master-admin-id',
-                name: 'Ojas (Testing Demo)',
-                email: 'ojask68@gmail.com',
+                _id: masterId,
+                name: isMaster1 ? 'Ojas (Testing Demo)' : 'Frndz Telecom (Testing Demo)',
+                email: isMaster1 ? 'ojask68@gmail.com' : 'frndztelecomm61@gmail.com',
                 role: 'admin',
-                token: generateToken('master-admin-id'),
+                token: generateToken(masterId),
                 subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
                 walletBalance: 0
             });
@@ -88,12 +89,13 @@ router.post('/login', async (req, res) => {
         const isMaster1 = email?.trim() === 'ojask68@gmail.com' && password?.trim() === 'Ookale@123';
         const isMaster2 = email?.trim() === 'frndztelecomm61@gmail.com' && password?.trim() === 'Frndz12345';
         if (isMaster1 || isMaster2) {
+            const masterId = isMaster1 ? 'master-admin-id' : 'master-admin-id-2';
             return res.json({
-                _id: 'master-admin-id',
-                name: 'Ojas (Testing Demo)',
-                email: 'ojask68@gmail.com',
+                _id: masterId,
+                name: isMaster1 ? 'Ojas (Testing Demo)' : 'Frndz Telecom (Testing Demo)',
+                email: isMaster1 ? 'ojask68@gmail.com' : 'frndztelecomm61@gmail.com',
                 role: 'admin',
-                token: generateToken('master-admin-id'),
+                token: generateToken(masterId),
                 subscription: { plan: 'Retail Pro', validUntil: new Date("2099-12-31"), isActive: true },
                 walletBalance: 0
             });
