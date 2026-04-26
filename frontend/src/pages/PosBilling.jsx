@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { ShoppingCart, Plus, Receipt, Search, MessageSquare } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 const PosBilling = () => {
     const { token } = useAuth();
@@ -15,6 +16,7 @@ const PosBilling = () => {
     const [billingMode, setBillingMode] = useState('Customer'); // 'Customer' or 'Retailer'
     const [paymentMode, setPaymentMode] = useState('Cash'); // 'Cash' or 'Online'
     const [lastSale, setLastSale] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const addToCart = (product) => {
         if (product.stockQuantity <= 0) {
@@ -73,28 +75,63 @@ const PosBilling = () => {
 
     const checkout = async () => {
         if(cart.length === 0 || !customerName) return alert("Add items and customer name");
+        
+        setIsGenerating(true);
+
+        // Capture Receipt Image
+        let clipboardSuccess = false;
+        try {
+            const receiptEl = document.getElementById('receipt-capture');
+            if (receiptEl) {
+                // Briefly show the receipt off-screen to allow proper rendering before capture
+                receiptEl.style.display = 'block';
+                const canvas = await html2canvas(receiptEl, { backgroundColor: '#ffffff', scale: 2, useCORS: true });
+                receiptEl.style.display = 'none';
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (blob && navigator.clipboard && navigator.clipboard.write) {
+                    try {
+                        const item = new ClipboardItem({ 'image/png': blob });
+                        await navigator.clipboard.write([item]);
+                        clipboardSuccess = true;
+                    } catch (err) {
+                        console.error('Clipboard copy failed:', err);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Image generation failed:', err);
+        }
+
         try {
             const res = await fetch('https://ok-ax2v.onrender.com/api/pos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ customerName, customerPhone, items: cart, subtotal, discountApplied: 0, finalTotal, paymentMode })
             });
+            
             if(res.ok) {
                 setLastSale({ customerName, customerPhone, cart: [...cart], finalTotal, paymentMode });
                 
-                // Automatically send WhatsApp receipt if phone is provided
+                // Send WhatsApp receipt if phone is provided
                 if (customerPhone) {
-                    const itemNames = cart.map(c => c.name).join(', ');
-                    const text = `Hello ${customerName}, thank you for your purchase of ${itemNames} at our shop! Your total cost is ₹${finalTotal.toFixed(2)} (${paymentMode}). We hope you have a great day and visit us again!`;
+                    const text = `Hello ${customerName}, here is your receipt from OK ERP! Please see the attached image. Thank you for your purchase!`;
                     const url = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(text)}`;
                     window.open(url, '_blank');
                 }
 
                 setCart([]); setCustomerName(''); setCustomerPhone(''); setPaymentMode('Cash');
-                setSuccessMsg(customerPhone ? 'Invoice generated & WhatsApp opened! 🎉' : 'Invoice generated! 🎉');
-                setTimeout(() => setSuccessMsg(''), 4000);
+                
+                if (clipboardSuccess && customerPhone) {
+                    setSuccessMsg('Invoice generated! 🎉 The receipt picture is COPIED to your clipboard. Paste (Ctrl+V) it in WhatsApp now!');
+                } else {
+                    setSuccessMsg('Invoice generated! 🎉');
+                }
+                setTimeout(() => setSuccessMsg(''), 6000);
             }
         } catch(e) { console.error(e); }
+        
+        setIsGenerating(false);
     }
 
     return (
@@ -184,7 +221,61 @@ const PosBilling = () => {
                     </div>
 
                     <div style={{display: 'flex', gap: '0.5rem'}}>
-                        <button className="btn btn-green" style={{flex: 1, padding: '0.6rem'}} onClick={checkout}><Receipt size={18} style={{marginRight: '5px'}} /> Cash Out & Send Receipt</button>
+                        <button className="btn btn-green" style={{flex: 1, padding: '0.6rem'}} onClick={checkout} disabled={isGenerating}>
+                            <Receipt size={18} style={{marginRight: '5px'}} /> {isGenerating ? 'Generating Receipt...' : 'Cash Out & Send Receipt'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Hidden HTML Receipt Template for Canvas Rendering */}
+            <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none', zIndex: -1 }}>
+                <div id="receipt-capture" style={{ display: 'none', width: '380px', background: '#ffffff', color: '#000000', padding: '24px', fontFamily: 'monospace', borderRadius: '0px' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '16px', borderBottom: '2px dashed #000', paddingBottom: '12px' }}>
+                        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.6rem', fontWeight: 'bold' }}>OK ERP / Frndz Telecom</h2>
+                        <p style={{ margin: '0', fontSize: '0.9rem', color: '#555' }}>Thank you for your business!</p>
+                    </div>
+                    
+                    <div style={{ marginBottom: '16px', fontSize: '0.95rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span>Date:</span> <strong>{new Date().toLocaleDateString()}</strong>
+                        </div>
+                        {customerName && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span>Customer:</span> <strong>{customerName}</strong>
+                            </div>
+                        )}
+                        {customerPhone && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span>Phone:</span> <strong>{customerPhone}</strong>
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Payment:</span> <strong>{paymentMode}</strong>
+                        </div>
+                    </div>
+
+                    <div style={{ borderTop: '2px dashed #000', borderBottom: '2px dashed #000', padding: '12px 0', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '8px' }}>
+                            <span style={{ flex: 2 }}>Item</span>
+                            <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
+                            <span style={{ flex: 1, textAlign: 'right' }}>Price</span>
+                        </div>
+                        {cart.map(c => (
+                            <div key={c.product} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.9rem' }}>
+                                <span style={{ flex: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</span>
+                                <span style={{ flex: 1, textAlign: 'center' }}>{c.quantity}</span>
+                                <span style={{ flex: 1, textAlign: 'right' }}>₹{c.total}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ textAlign: 'right', fontSize: '1.2rem' }}>
+                        <span>Total: </span>
+                        <strong style={{ fontSize: '1.5rem' }}>₹{finalTotal.toFixed(2)}</strong>
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.8rem', color: '#777' }}>
+                        System generated receipt by OK ERP
                     </div>
                 </div>
             </div>
