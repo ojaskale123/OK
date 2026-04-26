@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import { ShoppingCart, Plus, Receipt, Search, MessageSquare } from 'lucide-react';
 
 const PosBilling = () => {
     const { token } = useAuth();
-    const [products, setProducts] = useState([]);
+    const { products, isLoadingProducts } = useData();
     const [cart, setCart] = useState([]);
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
@@ -14,12 +15,6 @@ const PosBilling = () => {
     const [billingMode, setBillingMode] = useState('Customer'); // 'Customer' or 'Retailer'
     const [paymentMode, setPaymentMode] = useState('Cash'); // 'Cash' or 'Online'
     const [lastSale, setLastSale] = useState(null);
-
-    useEffect(() => {
-        fetch('https://ok-ax2v.onrender.com/api/products', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => res.json())
-        .then(data => setProducts(data));
-    }, [token]);
 
     const addToCart = (product) => {
         if (product.stockQuantity <= 0) {

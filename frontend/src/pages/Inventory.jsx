@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import { Package, AlertTriangle, Plus, Barcode, TrendingUp, Image as ImageIcon, Trash2 } from 'lucide-react';
 
 const CATEGORIES = ["Second Hand Mobile", "Batteries", "Accessories", "Folders", "OCA", "Others"];
 
 const Inventory = () => {
     const { token, user } = useAuth();
-    const [products, setProducts] = useState([]);
+    const { products, refreshProducts } = useData();
     const [filterCat, setFilterCat] = useState('All');
     
     // Form States
@@ -26,20 +27,6 @@ const Inventory = () => {
     const [error, setError] = useState(null);
 
     const plan = user?.subscription?.plan || 'None';
-
-    const fetchProducts = async () => {
-        try {
-            const res = await fetch('https://ok-ax2v.onrender.com/api/products', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if(Array.isArray(data)) {
-                setProducts(data);
-            }
-        } catch(e) {}
-    }
-
-    useEffect(() => { fetchProducts(); }, []);
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -62,7 +49,7 @@ const Inventory = () => {
             const data = await res.json();
             if(!res.ok) throw new Error(data.message);
             
-            setProducts([...products, data]);
+            await refreshProducts();
             setName(''); setBarcode(''); setCategory('Others'); setImage(''); setBuyPrice(''); setPrice(''); setRetailerPrice(''); setStock(''); setMfgDate('');
         } catch(err) {
             setError(err.message);
@@ -81,8 +68,7 @@ const Inventory = () => {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(editForm)
             });
-            const data = await res.json();
-            setProducts(products.map(p => p._id === id ? data : p));
+            await refreshProducts();
             setEditProductId(null);
         } catch(e) { console.error(e); }
     }
@@ -95,7 +81,7 @@ const Inventory = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
-                setProducts(products.filter(p => p._id !== id));
+                await refreshProducts();
             }
         } catch(e) { console.error(e); }
     }

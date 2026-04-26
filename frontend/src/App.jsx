@@ -6,6 +6,7 @@ import './index.css';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
 
 // Pages
 import Login from './pages/Login';
@@ -77,32 +78,34 @@ function Layout({ children }) {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public / Fullscreen Routes (No Sidebar) */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/plans" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-          
-          {/* App Core Routes (With Sidebar and Topbar) */}
-          <Route path="/*" element={
-            <Layout>
-              <Routes>
-                <Route path="/dashboard" element={<PrivateRoute><LockScreen><Dashboard /></LockScreen></PrivateRoute>} />
-                <Route path="/pos" element={<PrivateRoute><LockScreen><PosBilling /></LockScreen></PrivateRoute>} />
-                <Route path="/inventory" element={<PrivateRoute><LockScreen><Inventory /></LockScreen></PrivateRoute>} />
-                <Route path="/cashbook" element={<PrivateRoute><LockScreen><Cashbook /></LockScreen></PrivateRoute>} />
-                <Route path="/history" element={<PrivateRoute><LockScreen><History /></LockScreen></PrivateRoute>} />
-                <Route path="/rewards" element={<PrivateRoute><LockScreen><Gamification /></LockScreen></PrivateRoute>} />
-                <Route path="/profile" element={<PrivateRoute><LockScreen><Profile /></LockScreen></PrivateRoute>} />
-                <Route path="/workers" element={<PrivateRoute><LockScreen><WorkerManagement /></LockScreen></PrivateRoute>} />
-                <Route path="/repairs" element={<PrivateRoute><LockScreen><RepairManagement /></LockScreen></PrivateRoute>} />
-                <Route path="/whatsapp" element={<PrivateRoute><LockScreen><WhatsAppCenter /></LockScreen></PrivateRoute>} />
-              </Routes>
-            </Layout>
-          } />
-        </Routes>
-      </Router>
+      <DataProvider>
+        <Router>
+          <Routes>
+            {/* Public / Fullscreen Routes (No Sidebar) */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/plans" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+            
+            {/* App Core Routes (With Sidebar and Topbar) */}
+            <Route path="/*" element={
+              <Layout>
+                <Routes>
+                  <Route path="/dashboard" element={<PrivateRoute><LockScreen><Dashboard /></LockScreen></PrivateRoute>} />
+                  <Route path="/pos" element={<PrivateRoute><LockScreen><PosBilling /></LockScreen></PrivateRoute>} />
+                  <Route path="/inventory" element={<PrivateRoute><LockScreen><Inventory /></LockScreen></PrivateRoute>} />
+                  <Route path="/cashbook" element={<PrivateRoute><LockScreen><Cashbook /></LockScreen></PrivateRoute>} />
+                  <Route path="/history" element={<PrivateRoute><LockScreen><History /></LockScreen></PrivateRoute>} />
+                  <Route path="/rewards" element={<PrivateRoute><LockScreen><Gamification /></LockScreen></PrivateRoute>} />
+                  <Route path="/profile" element={<PrivateRoute><LockScreen><Profile /></LockScreen></PrivateRoute>} />
+                  <Route path="/workers" element={<PrivateRoute><LockScreen><WorkerManagement /></LockScreen></PrivateRoute>} />
+                  <Route path="/repairs" element={<PrivateRoute><LockScreen><RepairManagement /></LockScreen></PrivateRoute>} />
+                  <Route path="/whatsapp" element={<PrivateRoute><LockScreen><WhatsAppCenter /></LockScreen></PrivateRoute>} />
+                </Routes>
+              </Layout>
+            } />
+          </Routes>
+        </Router>
+      </DataProvider>
     </AuthProvider>
   );
 }
