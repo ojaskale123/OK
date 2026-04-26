@@ -5,7 +5,9 @@ import { UserPlus, Users } from 'lucide-react';
 const WorkerManagement = () => {
   const { token } = useAuth();
   const [workers, setWorkers] = useState([]);
+  const [attendanceLogs, setAttendanceLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [settingLocation, setSettingLocation] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
   const fetchWorkers = async () => {
@@ -13,10 +15,12 @@ const WorkerManagement = () => {
           const res = await fetch('https://ok-ax2v.onrender.com/api/workers', {
               headers: { 'Authorization': `Bearer ${token}` }
           });
-          if(res.ok) {
-              const data = await res.json();
-              setWorkers(data);
-          }
+          if(res.ok) setWorkers(await res.json());
+
+          const attRes = await fetch('https://ok-ax2v.onrender.com/api/attendance', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if(attRes.ok) setAttendanceLogs(await attRes.json());
       } catch (err) {
           console.error(err);
       }
@@ -25,6 +29,26 @@ const WorkerManagement = () => {
   useEffect(() => {
       fetchWorkers();
   }, [token]);
+
+  const handleSetLocation = () => {
+      if (!navigator.geolocation) return alert("Geolocation is not supported by your browser");
+      setSettingLocation(true);
+      navigator.geolocation.getCurrentPosition(async (position) => {
+          try {
+              const res = await fetch('https://ok-ax2v.onrender.com/api/attendance/shop-location', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                  body: JSON.stringify({ lat: position.coords.latitude, lng: position.coords.longitude })
+              });
+              if(res.ok) alert("Shop GPS Location Locked Successfully!");
+              else alert("Failed to lock location.");
+          } catch(e) { console.error(e); }
+          setSettingLocation(false);
+      }, () => {
+          alert("Unable to retrieve your location. Please allow location access.");
+          setSettingLocation(false);
+      });
+  };
 
   const handleSubmit = async (e) => {
       e.preventDefault();
@@ -54,8 +78,11 @@ const WorkerManagement = () => {
     <div className="animate-fade-in" style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <h2 className="text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Users size={28} /> Workers & Staff
+                <Users size={28} /> Workers & Attendance
             </h2>
+            <button className="btn btn-green" onClick={handleSetLocation} disabled={settingLocation}>
+                {settingLocation ? 'Locking GPS...' : '📍 Lock Current GPS as Shop Location'}
+            </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
@@ -105,6 +132,37 @@ const WorkerManagement = () => {
                         ))}
                     </div>
                 )}
+            </div>
+
+            {/* Attendance Logs */}
+            <div className="glass-card" style={{ gridColumn: '1 / -1' }}>
+                <h3 style={{ marginBottom: '1.5rem' }}>GPS Attendance Log</h3>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                                <th style={{ padding: '1rem 0' }}>Date</th>
+                                <th>Worker</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Distance Variance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {attendanceLogs.length === 0 ? (
+                                <tr><td colSpan="5" className="text-secondary" style={{ padding: '2rem 0', textAlign: 'center' }}>No attendance records yet.</td></tr>
+                            ) : attendanceLogs.map(log => (
+                                <tr key={log._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '1rem 0' }}>{log.date}</td>
+                                    <td>{log.workerId?.name}</td>
+                                    <td className="amount-receive">{log.checkInTime ? new Date(log.checkInTime).toLocaleTimeString() : '--'}</td>
+                                    <td className="amount-give">{log.checkOutTime ? new Date(log.checkOutTime).toLocaleTimeString() : '--'}</td>
+                                    <td>{log.checkInLocation?.distanceFromShop ? `${Math.round(log.checkInLocation.distanceFromShop)}m` : 'Unknown'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

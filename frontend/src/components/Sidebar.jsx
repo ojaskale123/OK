@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, Package, BookOpen, Crown, User, Gift, Users, Brain, MessageSquare, FileText, Lock, Zap } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Package, BookOpen, Crown, User, Gift, Users, Brain, MessageSquare, FileText, Lock, Zap, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
@@ -21,6 +21,7 @@ const Sidebar = () => {
     { name: 'Workers & Staff', path: '/workers', icon: Users, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
     { name: 'Chat Cashbook', path: '/cashbook', icon: BookOpen, locked: plan === 'Shopkeeper' || plan === 'None', hidden: isWorker },
     { name: 'WhatsApp Bot', path: '/whatsapp', icon: MessageSquare, locked: false, hidden: isWorker },
+    { name: 'Time & Attendance', path: '/attendance', icon: Clock },
     { name: 'Action History', path: '/history', icon: FileText },
 
     { name: 'Profile', path: '/profile', icon: User },

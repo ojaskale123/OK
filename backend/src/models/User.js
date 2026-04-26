@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
         plan: { type: String, enum: ['None', 'Shopkeeper', 'Wholesale', 'Retail Pro'], default: 'None' },
         validUntil: { type: Date },
         isActive: { type: Boolean, default: false }
+    },
+    shopLocation: {
+        lat: { type: Number },
+        lng: { type: Number },
+        address: { type: String }
     }
 }, { timestamps: true });
 

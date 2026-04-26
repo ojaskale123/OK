@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import WorkerManagement from './pages/WorkerManagement';
 import RepairManagement from './pages/RepairManagement';
 import WhatsAppCenter from './pages/WhatsAppCenter';
+import Attendance from './pages/Attendance';
 
 const PrivateRoute = ({ children }) => {
     const { token } = useAuth();
@@ -100,6 +101,7 @@ function App() {
                   <Route path="/workers" element={<PrivateRoute><LockScreen><WorkerManagement /></LockScreen></PrivateRoute>} />
                   <Route path="/repairs" element={<PrivateRoute><LockScreen><RepairManagement /></LockScreen></PrivateRoute>} />
                   <Route path="/whatsapp" element={<PrivateRoute><LockScreen><WhatsAppCenter /></LockScreen></PrivateRoute>} />
+                  <Route path="/attendance" element={<PrivateRoute><LockScreen><Attendance /></LockScreen></PrivateRoute>} />
                 </Routes>
               </Layout>
             } />
