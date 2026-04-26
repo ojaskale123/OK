@@ -1,53 +1,42 @@
 const express = require('express');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Middleware to authenticate
-const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Unauthorized' });
-    try {
-        req.user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-        next();
-    } catch (e) {
-        return res.status(401).json({ message: 'Invalid token' });
-    }
+router.use(protect);
+
+// In-memory storage for master accounts so testing works without DB crashes
+let masterLocations = {
+    '000000000000000000000000': null,
+    '111111111111111111111111': null
 };
 
-router.use(authMiddleware);
-
-// Haversine formula to calculate distance in meters
 function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
-  var R = 6371; // Radius of the earth in km
+  var R = 6371; 
   var dLat = deg2rad(lat2-lat1);  
   var dLon = deg2rad(lon2-lon1); 
-  var a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-    ; 
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
   var d = R * c; 
-  return d * 1000; // Distance in meters
+  return d * 1000; 
 }
 
-function deg2rad(deg) {
-  return deg * (Math.PI/180);
-}
+function deg2rad(deg) { return deg * (Math.PI/180); }
 
 // Set Shop Location (Admin only)
 router.post('/shop-location', async (req, res) => {
     try {
         const { lat, lng, address } = req.body;
         
-        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
-            return res.status(400).json({ message: 'You are logged in using a Virtual Master Account. Please create a real registered account to save GPS coordinates.' });
+        // Handle Master Bypass Account
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
+            masterLocations[req.user._id] = { lat, lng, address };
+            return res.json({ message: 'Virtual Shop Location Locked Successfully', shopLocation: masterLocations[req.user._id] });
         }
 
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id);
         if (!user) return res.status(404).json({ message: 'User not found in database.' });
         
         if (user.role !== 'admin' && user.role !== 'user') {
@@ -58,7 +47,7 @@ router.post('/shop-location', async (req, res) => {
         await user.save();
         res.json({ message: 'Shop location updated successfully', shopLocation: user.shopLocation });
     } catch (e) {
-        res.status(500).json({ message: 'Error setting location' });
+        res.status(500).json({ message: 'Error setting location', error: e.message });
     }
 });
 
@@ -67,32 +56,38 @@ router.post('/check-in', async (req, res) => {
     try {
         const { lat, lng } = req.body;
         
-        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
             return res.status(400).json({ message: 'Virtual Master Accounts cannot clock in.' });
         }
 
-        const worker = await User.findById(req.user.id);
+        const worker = await User.findById(req.user._id);
         if (!worker) return res.status(404).json({ message: 'Worker not found.' });
         
         if (worker.role !== 'worker') {
             return res.status(403).json({ message: 'Only workers can clock in' });
         }
 
-        const employer = await User.findById(worker.employerId);
-        if (!employer.shopLocation || !employer.shopLocation.lat) {
+        let shopLocation;
+        if (worker.employerId.toString() === '000000000000000000000000' || worker.employerId.toString() === '111111111111111111111111') {
+            shopLocation = masterLocations[worker.employerId.toString()];
+        } else {
+            const employer = await User.findById(worker.employerId);
+            shopLocation = employer?.shopLocation;
+        }
+
+        if (!shopLocation || !shopLocation.lat) {
             return res.status(400).json({ message: 'Employer has not set the shop location yet.' });
         }
 
         // Calculate distance
-        const distance = getDistanceFromLatLonInM(lat, lng, employer.shopLocation.lat, employer.shopLocation.lng);
+        const distance = getDistanceFromLatLonInM(lat, lng, shopLocation.lat, shopLocation.lng);
         
-        if (distance > 100) { // 100 meters radius
+        if (distance > 100) { 
             return res.status(403).json({ message: `You are too far from the shop (${Math.round(distance)}m away). You must be within 100m to clock in.` });
         }
 
         const today = new Date().toISOString().split('T')[0];
         
-        // Check if already checked in today
         let attendance = await Attendance.findOne({ workerId: worker._id, date: today });
         if (attendance) {
             return res.status(400).json({ message: 'You have already clocked in today.' });
@@ -100,7 +95,7 @@ router.post('/check-in', async (req, res) => {
 
         attendance = new Attendance({
             workerId: worker._id,
-            employerId: employer._id,
+            employerId: worker.employerId,
             date: today,
             checkInTime: new Date(),
             checkInLocation: { lat, lng, distanceFromShop: distance }
@@ -117,11 +112,11 @@ router.post('/check-in', async (req, res) => {
 // Check-out (Worker only)
 router.post('/check-out', async (req, res) => {
     try {
-        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
             return res.status(400).json({ message: 'Virtual Master Accounts cannot clock out.' });
         }
         
-        const worker = await User.findById(req.user.id);
+        const worker = await User.findById(req.user._id);
         if (!worker) return res.status(404).json({ message: 'Worker not found.' });
         const today = new Date().toISOString().split('T')[0];
         
@@ -146,18 +141,19 @@ router.post('/check-out', async (req, res) => {
 // Get Attendance Records (Employer gets all, Worker gets own)
 router.get('/', async (req, res) => {
     try {
-        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
-            return res.json([]);
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
+            // Master Admin sees all attendance for their "virtual" workers
+            const records = await Attendance.find({ employerId: req.user._id }).sort({ date: -1 }).populate('workerId', 'name email');
+            return res.json(records);
         }
 
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id);
         if (!user) return res.status(404).json({ message: 'User not found.' });
-        let records;
         
+        let records;
         if (user.role === 'worker') {
             records = await Attendance.find({ workerId: user._id }).sort({ date: -1 }).populate('workerId', 'name email');
         } else {
-            // Admin/Employer
             records = await Attendance.find({ employerId: user._id }).sort({ date: -1 }).populate('workerId', 'name email');
         }
         
