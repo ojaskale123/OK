@@ -15,6 +15,7 @@ const billSchema = new mongoose.Schema({
     gstAmount: { type: Number, default: 0 },
     discountApplied: { type: Number, default: 0 },
     finalTotal: { type: Number, required: true },
+    paymentMode: { type: String, enum: ['Cash', 'Online'], default: 'Cash' },
     date: { type: Date, default: Date.now }
 }, { timestamps: true });
 

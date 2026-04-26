@@ -8,10 +8,10 @@ let masterBills = [];
 
 router.post('/', protect, async (req, res) => {
     try {
-        const { customerName, customerPhone, items, subtotal, discountApplied, finalTotal } = req.body;
+        const { customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode } = req.body;
         
         if (req.user._id === 'master-admin-id') {
-            const bill = { _id: Date.now().toString(), customerName, customerPhone, items, subtotal, discountApplied, finalTotal, date: new Date().toISOString() };
+            const bill = { _id: Date.now().toString(), customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode, date: new Date().toISOString() };
             masterBills.push(bill);
             global.masterLogs = global.masterLogs || [];
             global.masterLogs.push({
@@ -24,7 +24,7 @@ router.post('/', protect, async (req, res) => {
 
         const bill = await Bill.create({
             user: req.user.ownerId,
-            customerName, customerPhone, items, subtotal, discountApplied, finalTotal
+            customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode
         });
         
         await ActivityLog.create({

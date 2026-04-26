@@ -12,6 +12,7 @@ const PosBilling = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
     const [billingMode, setBillingMode] = useState('Customer'); // 'Customer' or 'Retailer'
+    const [paymentMode, setPaymentMode] = useState('Cash'); // 'Cash' or 'Online'
     const [lastSale, setLastSale] = useState(null);
 
     useEffect(() => {
@@ -81,43 +82,25 @@ const PosBilling = () => {
             const res = await fetch('https://ok-ax2v.onrender.com/api/pos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ customerName, customerPhone, items: cart, subtotal, discountApplied: 0, finalTotal })
+                body: JSON.stringify({ customerName, customerPhone, items: cart, subtotal, discountApplied: 0, finalTotal, paymentMode })
             });
             if(res.ok) {
-                setLastSale({ customerName, customerPhone, cart: [...cart], finalTotal });
-                setCart([]); setCustomerName(''); setCustomerPhone('');
-                setSuccessMsg('Invoice generated! 🎉 +5 Gamification Credits added.');
+                setLastSale({ customerName, customerPhone, cart: [...cart], finalTotal, paymentMode });
+                
+                // Automatically send WhatsApp receipt if phone is provided
+                if (customerPhone) {
+                    const itemNames = cart.map(c => c.name).join(', ');
+                    const text = `Hello ${customerName}, thank you for your purchase of ${itemNames} at our shop! Your total cost is ₹${finalTotal.toFixed(2)} (${paymentMode}). We hope you have a great day and visit us again!`;
+                    const url = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(text)}`;
+                    window.open(url, '_blank');
+                }
+
+                setCart([]); setCustomerName(''); setCustomerPhone(''); setPaymentMode('Cash');
+                setSuccessMsg(customerPhone ? 'Invoice generated & WhatsApp opened! 🎉' : 'Invoice generated! 🎉');
                 setTimeout(() => setSuccessMsg(''), 4000);
             }
         } catch(e) { console.error(e); }
     }
-
-    const sendWhatsAppReceipt = () => {
-        let name = customerName;
-        let phone = customerPhone;
-        let items = cart;
-        let total = finalTotal;
-
-        if (cart.length === 0) {
-            if (lastSale) {
-                name = lastSale.customerName;
-                phone = lastSale.customerPhone;
-                items = lastSale.cart;
-                total = lastSale.finalTotal;
-            } else {
-                return alert("Cart is empty and no recent sale found.");
-            }
-        }
-
-        if (!name) return alert("Please enter customer name.");
-        if (!phone) return alert("Please enter customer phone number to send WhatsApp receipt.");
-        
-        const itemNames = items.map(c => c.name).join(', ');
-        const text = `Hello ${name}, thank you for your purchase of ${itemNames} at our shop! Your total cost is ₹${total.toFixed(2)}. We hope you have a great day and visit us again!`;
-        
-        const url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
-        window.open(url, '_blank');
-    };
 
     return (
         <div className="animate-fade-in" style={{display: 'flex', gap: '2rem'}}>
@@ -125,11 +108,18 @@ const PosBilling = () => {
                 <h2 className="text-gradient" style={{marginBottom: '1rem'}}>Point of Sale (POS)</h2>
                 {successMsg && <div className="glass-card" style={{borderColor: 'var(--ok-green)', marginBottom: '1rem'}}><p className="amount-receive">{successMsg}</p></div>}
                 
-                {/* Billing Mode Toggle */}
-                <div style={{display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center'}}>
-                    <span className="text-secondary" style={{fontSize: '0.9rem'}}>Sale Type:</span>
-                    <button className={`btn ${billingMode === 'Customer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Customer')}>Customer</button>
-                    <button className={`btn ${billingMode === 'Retailer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Retailer')}>Retailer</button>
+                {/* Billing & Payment Mode Toggles */}
+                <div style={{display: 'flex', gap: '2rem', marginBottom: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
+                    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+                        <span className="text-secondary" style={{fontSize: '0.9rem'}}>Sale Type:</span>
+                        <button className={`btn ${billingMode === 'Customer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Customer')}>Customer</button>
+                        <button className={`btn ${billingMode === 'Retailer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Retailer')}>Retailer</button>
+                    </div>
+                    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+                        <span className="text-secondary" style={{fontSize: '0.9rem'}}>Payment:</span>
+                        <button className={`btn ${paymentMode === 'Cash' ? 'btn-green' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setPaymentMode('Cash')}>Cash</button>
+                        <button className={`btn ${paymentMode === 'Online' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setPaymentMode('Online')}>Online</button>
+                    </div>
                 </div>
 
                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1.5rem'}}>
@@ -200,8 +190,7 @@ const PosBilling = () => {
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}><span className="text-secondary">Subtotal</span> <span>₹{subtotal.toFixed(2)}</span></div>
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold'}}><span>Final Total</span> <span>₹{finalTotal.toFixed(2)}</span></div>
                     <div style={{display: 'flex', gap: '0.5rem'}}>
-                        <button className="btn btn-green" style={{flex: 1, padding: '0.6rem'}} onClick={checkout}><Receipt size={18} style={{marginRight: '5px'}} /> Checkout</button>
-                        <button className="btn btn-primary" style={{flex: 1, padding: '0.6rem', background: '#25D366', color: '#fff'}} onClick={sendWhatsAppReceipt}><MessageSquare size={18} style={{marginRight: '5px'}}/> WhatsApp Receipt</button>
+                        <button className="btn btn-green" style={{flex: 1, padding: '0.6rem'}} onClick={checkout}><Receipt size={18} style={{marginRight: '5px'}} /> Cash Out & Send Receipt</button>
                     </div>
                 </div>
             </div>
