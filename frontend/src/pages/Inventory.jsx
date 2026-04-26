@@ -210,21 +210,42 @@ const Inventory = () => {
                             if (editProductId === p._id) {
                                 return (
                                     <div key={p._id} className="glass-card" style={{padding: '1rem', background: 'rgba(139, 92, 246, 0.1)'}}>
-                                        <input className="form-input" style={{marginBottom: '0.5rem', fontSize: '0.9rem'}} value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} />
-                                        <select className="form-input" style={{marginBottom: '0.5rem', padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.category} onChange={e=>setEditForm({...editForm, category: e.target.value})}>
-                                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
+                                        <div style={{marginBottom: '0.5rem'}}>
+                                            <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Product Name</label>
+                                            <input className="form-input" style={{fontSize: '0.9rem', padding: '0.4rem'}} value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} />
+                                        </div>
+                                        <div style={{marginBottom: '0.5rem'}}>
+                                            <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Category</label>
+                                            <select className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.category} onChange={e=>setEditForm({...editForm, category: e.target.value})}>
+                                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                            </select>
+                                        </div>
                                         {editForm.category === 'Batteries' && (
-                                            <input type="date" className="form-input" style={{marginBottom: '0.5rem', padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.mfgDate} onChange={e=>setEditForm({...editForm, mfgDate: e.target.value})} />
+                                            <div style={{marginBottom: '0.5rem'}}>
+                                                <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Mfg Date</label>
+                                                <input type="date" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.mfgDate} onChange={e=>setEditForm({...editForm, mfgDate: e.target.value})} />
+                                            </div>
                                         )}
                                         <div style={{display: 'flex', gap: '0.5rem', marginBottom: '0.5rem'}}>
-                                            <input type="number" placeholder="Buy" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.buyPrice} onChange={e=>setEditForm({...editForm, buyPrice: e.target.value})} />
-                                            <input type="number" placeholder="Cust." className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} />
-                                            <input type="number" placeholder="Retailer" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.retailerPrice} onChange={e=>setEditForm({...editForm, retailerPrice: e.target.value})} />
+                                            <div style={{flex: 1}}>
+                                                <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Buy (₹)</label>
+                                                <input type="number" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.buyPrice} onChange={e=>setEditForm({...editForm, buyPrice: e.target.value})} />
+                                            </div>
+                                            <div style={{flex: 1}}>
+                                                <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Cust. (₹)</label>
+                                                <input type="number" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} />
+                                            </div>
+                                            <div style={{flex: 1}}>
+                                                <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Retailer (₹)</label>
+                                                <input type="number" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem'}} value={editForm.retailerPrice} onChange={e=>setEditForm({...editForm, retailerPrice: e.target.value})} />
+                                            </div>
                                         </div>
-                                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem'}}>
-                                            <input type="number" placeholder="Qty" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem', width: '60px'}} value={editForm.stockQuantity} onChange={e=>setEditForm({...editForm, stockQuantity: e.target.value})} />
-                                            <button className="btn btn-primary" style={{padding: '0.4rem 0.8rem', fontSize: '0.8rem'}} onClick={() => saveEdit(p._id)}>Save</button>
+                                        <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.5rem'}}>
+                                            <div>
+                                                <label style={{fontSize: '0.7rem', color: 'var(--text-secondary)'}}>Stock Qty</label>
+                                                <input type="number" className="form-input" style={{padding: '0.4rem', fontSize: '0.8rem', width: '80px'}} value={editForm.stockQuantity} onChange={e=>setEditForm({...editForm, stockQuantity: e.target.value})} />
+                                            </div>
+                                            <button className="btn btn-primary" style={{padding: '0.4rem 0.8rem', fontSize: '0.8rem', height: 'max-content'}} onClick={() => saveEdit(p._id)}>Save</button>
                                         </div>
                                     </div>
                                 )
