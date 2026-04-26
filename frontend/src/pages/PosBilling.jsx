@@ -108,18 +108,11 @@ const PosBilling = () => {
                 <h2 className="text-gradient" style={{marginBottom: '1rem'}}>Point of Sale (POS)</h2>
                 {successMsg && <div className="glass-card" style={{borderColor: 'var(--ok-green)', marginBottom: '1rem'}}><p className="amount-receive">{successMsg}</p></div>}
                 
-                {/* Billing & Payment Mode Toggles */}
-                <div style={{display: 'flex', gap: '2rem', marginBottom: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
-                    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-                        <span className="text-secondary" style={{fontSize: '0.9rem'}}>Sale Type:</span>
-                        <button className={`btn ${billingMode === 'Customer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Customer')}>Customer</button>
-                        <button className={`btn ${billingMode === 'Retailer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Retailer')}>Retailer</button>
-                    </div>
-                    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-                        <span className="text-secondary" style={{fontSize: '0.9rem'}}>Payment:</span>
-                        <button className={`btn ${paymentMode === 'Cash' ? 'btn-green' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setPaymentMode('Cash')}>Cash</button>
-                        <button className={`btn ${paymentMode === 'Online' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setPaymentMode('Online')}>Online</button>
-                    </div>
+                {/* Billing Mode Toggle */}
+                <div style={{display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center'}}>
+                    <span className="text-secondary" style={{fontSize: '0.9rem'}}>Sale Type:</span>
+                    <button className={`btn ${billingMode === 'Customer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Customer')}>Customer</button>
+                    <button className={`btn ${billingMode === 'Retailer' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '20px'}} onClick={() => setBillingMode('Retailer')}>Retailer</button>
                 </div>
 
                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1.5rem'}}>
@@ -187,8 +180,14 @@ const PosBilling = () => {
                 </div>
 
                 <div>
-                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem'}}><span className="text-secondary">Subtotal</span> <span>₹{subtotal.toFixed(2)}</span></div>
-                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 'bold'}}><span>Final Total</span> <span>₹{finalTotal.toFixed(2)}</span></div>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}><span className="text-secondary">Subtotal</span> <span>₹{subtotal.toFixed(2)}</span></div>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1.2rem', fontWeight: 'bold'}}><span>Final Total</span> <span>₹{finalTotal.toFixed(2)}</span></div>
+                    
+                    <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '8px'}}>
+                        <button className={`btn ${paymentMode === 'Cash' ? 'btn-green' : 'btn-secondary'}`} style={{padding: '0.4rem', fontSize: '0.85rem', borderRadius: '8px', flex: 1}} onClick={() => setPaymentMode('Cash')}>💵 Cash</button>
+                        <button className={`btn ${paymentMode === 'Online' ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem', fontSize: '0.85rem', borderRadius: '8px', flex: 1}} onClick={() => setPaymentMode('Online')}>📱 Online</button>
+                    </div>
+
                     <div style={{display: 'flex', gap: '0.5rem'}}>
                         <button className="btn btn-green" style={{flex: 1, padding: '0.6rem'}} onClick={checkout}><Receipt size={18} style={{marginRight: '5px'}} /> Cash Out & Send Receipt</button>
                     </div>
