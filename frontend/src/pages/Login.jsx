@@ -49,17 +49,17 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           {!isLogin && (
             <div className="form-group">
-              <label className="form-label">Full Name</label>
-              <input type="text" className="form-input" value={name} onChange={e=>setName(e.target.value)} required />
+              <label className="form-label" htmlFor="registerName">Full Name</label>
+              <input id="registerName" name="registerName" type="text" className="form-input" value={name} onChange={e=>setName(e.target.value)} required />
             </div>
           )}
           <div className="form-group">
-            <label className="form-label">Email</label>
-            <input type="email" className="form-input" value={email} onChange={e=>setEmail(e.target.value)} required />
+            <label className="form-label" htmlFor="loginEmail">Email</label>
+            <input id="loginEmail" name="loginEmail" type="email" className="form-input" value={email} onChange={e=>setEmail(e.target.value)} required />
           </div>
           <div className="form-group">
-            <label className="form-label">Password</label>
-            <input type="password" className="form-input" value={password} onChange={e=>setPassword(e.target.value)} required />
+            <label className="form-label" htmlFor="loginPassword">Password</label>
+            <input id="loginPassword" name="loginPassword" type="password" className="form-input" value={password} onChange={e=>setPassword(e.target.value)} required />
           </div>
           
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>

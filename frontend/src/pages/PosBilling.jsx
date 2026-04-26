@@ -133,13 +133,16 @@ const PosBilling = () => {
                 </div>
 
                 <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1.5rem'}}>
-                    {['All', 'Second Hand Mobile', 'Batteries', 'Accessories', 'Others'].map(cat => (
+                    {['All', 'Second Hand Mobile', 'Batteries', 'Accessories', 'Folders', 'OCA', 'Others'].map(cat => (
                         <button key={cat} className={`btn ${categoryFilter === cat ? 'btn-primary' : 'btn-secondary'}`} style={{padding: '0.4rem 0.8rem', fontSize: '0.85rem'}} onClick={() => setCategoryFilter(cat)}>{cat}</button>
                     ))}
                 </div>
 
                 <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
                     <input 
+                        id="productSearch"
+                        name="productSearch"
+                        aria-label="Search products"
                         type="text" 
                         className="form-input" 
                         placeholder="Scan barcode or type name..." 
@@ -175,8 +178,8 @@ const PosBilling = () => {
             <div className="glass-card" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
                 <h3 style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem'}}><ShoppingCart /> Current Bill</h3>
                 
-                <div className="form-group"><input placeholder="Customer Name" className="form-input" value={customerName} onChange={e=>setCustomerName(e.target.value)} /></div>
-                <div className="form-group"><input placeholder="Phone (Optional)" className="form-input" value={customerPhone} onChange={e=>setCustomerPhone(e.target.value)} /></div>
+                <div className="form-group"><input id="customerName" name="customerName" aria-label="Customer Name" placeholder="Customer Name" className="form-input" value={customerName} onChange={e=>setCustomerName(e.target.value)} /></div>
+                <div className="form-group"><input id="customerPhone" name="customerPhone" aria-label="Customer Phone" placeholder="Phone (Optional)" className="form-input" value={customerPhone} onChange={e=>setCustomerPhone(e.target.value)} /></div>
 
                 <div style={{flex: 1, borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', margin: '1rem 0', padding: '1rem 0', overflowY: 'auto'}}>
                     {cart.map(c => (

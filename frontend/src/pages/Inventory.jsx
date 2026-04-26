@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Package, AlertTriangle, Plus, Barcode, TrendingUp, Image as ImageIcon, Trash2 } from 'lucide-react';
 
-const CATEGORIES = ["Second Hand Mobile", "Batteries", "Accessories", "Others"];
+const CATEGORIES = ["Second Hand Mobile", "Batteries", "Accessories", "Folders", "OCA", "Others"];
 
 const Inventory = () => {
     const { token, user } = useAuth();
@@ -139,50 +139,50 @@ const Inventory = () => {
                                         <div style={{fontSize: '0.8rem'}}>Upload Image</div>
                                     </div>
                                 )}
-                                <input type="file" accept="image/*" style={{display: 'none'}} onChange={handleImageUpload} />
+                                <input id="imageUpload" name="imageUpload" aria-label="Upload product image" type="file" accept="image/*" style={{display: 'none'}} onChange={handleImageUpload} />
                             </label>
                         </div>
 
                         <div className="form-group" style={{position: 'relative'}}>
-                            <input placeholder="Barcode ID (Optional)" className="form-input" value={barcode} onChange={e=>setBarcode(e.target.value)} style={{paddingLeft: '35px'}} />
+                            <input id="barcode" name="barcode" aria-label="Barcode ID" placeholder="Barcode ID (Optional)" className="form-input" value={barcode} onChange={e=>setBarcode(e.target.value)} style={{paddingLeft: '35px'}} />
                             <Barcode size={18} className="text-secondary" style={{position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)'}} />
                         </div>
                         
                         <div className="form-group">
-                            <input placeholder="Product Name" className="form-input" value={name} onChange={e=>setName(e.target.value)} required />
+                            <input id="productName" name="productName" aria-label="Product Name" placeholder="Product Name" className="form-input" value={name} onChange={e=>setName(e.target.value)} required />
                         </div>
                         
                         <div className="form-group">
-                            <select className="form-input" value={category} onChange={e=>setCategory(e.target.value)}>
+                            <select id="productCategory" name="productCategory" aria-label="Product Category" className="form-input" value={category} onChange={e=>setCategory(e.target.value)}>
                                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
 
                         {category === 'Batteries' && (
                             <div className="form-group" style={{animation: 'fadeIn 0.2s ease'}}>
-                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Manufacturing Date</label>
-                                <input type="date" className="form-input" value={mfgDate} onChange={e=>setMfgDate(e.target.value)} required />
+                                <label htmlFor="mfgDate" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Manufacturing Date</label>
+                                <input id="mfgDate" name="mfgDate" type="date" className="form-input" value={mfgDate} onChange={e=>setMfgDate(e.target.value)} required />
                             </div>
                         )}
 
                         <div style={{display: 'flex', gap: '0.5rem'}}>
                             <div className="form-group" style={{flex: 1}}>
-                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Buy Price (₹)</label>
-                                <input placeholder="Cost" type="number" className="form-input" value={buyPrice} onChange={e=>setBuyPrice(e.target.value)} required />
+                                <label htmlFor="buyPrice" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Buy Price (₹)</label>
+                                <input id="buyPrice" name="buyPrice" placeholder="Cost" type="number" className="form-input" value={buyPrice} onChange={e=>setBuyPrice(e.target.value)} required />
                             </div>
                             <div className="form-group" style={{flex: 1}}>
-                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Cust. Price (₹)</label>
-                                <input placeholder="Retail" type="number" className="form-input" value={price} onChange={e=>setPrice(e.target.value)} required />
+                                <label htmlFor="price" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Cust. Price (₹)</label>
+                                <input id="price" name="price" placeholder="Retail" type="number" className="form-input" value={price} onChange={e=>setPrice(e.target.value)} required />
                             </div>
                             <div className="form-group" style={{flex: 1}}>
-                                <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Wholesale (₹)</label>
-                                <input placeholder="Dealer" type="number" className="form-input" value={retailerPrice} onChange={e=>setRetailerPrice(e.target.value)} required />
+                                <label htmlFor="retailerPrice" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Wholesale (₹)</label>
+                                <input id="retailerPrice" name="retailerPrice" placeholder="Dealer" type="number" className="form-input" value={retailerPrice} onChange={e=>setRetailerPrice(e.target.value)} required />
                             </div>
                         </div>
                         
                         <div className="form-group">
-                            <label style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Stock Quantity</label>
-                            <input placeholder="Quantity" type="number" className="form-input" value={stock} onChange={e=>setStock(e.target.value)} required />
+                            <label htmlFor="stock" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Stock Quantity</label>
+                            <input id="stock" name="stock" placeholder="Quantity" type="number" className="form-input" value={stock} onChange={e=>setStock(e.target.value)} required />
                         </div>
                         
                         <button className="btn btn-primary" style={{width: '100%', marginTop: '0.5rem'}}><Plus size={18} /> Catalog Item</button>
