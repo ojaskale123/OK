@@ -42,7 +42,13 @@ function deg2rad(deg) {
 router.post('/shop-location', async (req, res) => {
     try {
         const { lat, lng, address } = req.body;
+        
+        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
+            return res.status(400).json({ message: 'You are logged in using a Virtual Master Account. Please create a real registered account to save GPS coordinates.' });
+        }
+
         const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found in database.' });
         
         if (user.role !== 'admin' && user.role !== 'user') {
             return res.status(403).json({ message: 'Only employers can set shop location' });
@@ -60,7 +66,13 @@ router.post('/shop-location', async (req, res) => {
 router.post('/check-in', async (req, res) => {
     try {
         const { lat, lng } = req.body;
+        
+        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
+            return res.status(400).json({ message: 'Virtual Master Accounts cannot clock in.' });
+        }
+
         const worker = await User.findById(req.user.id);
+        if (!worker) return res.status(404).json({ message: 'Worker not found.' });
         
         if (worker.role !== 'worker') {
             return res.status(403).json({ message: 'Only workers can clock in' });
@@ -105,7 +117,12 @@ router.post('/check-in', async (req, res) => {
 // Check-out (Worker only)
 router.post('/check-out', async (req, res) => {
     try {
+        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
+            return res.status(400).json({ message: 'Virtual Master Accounts cannot clock out.' });
+        }
+        
         const worker = await User.findById(req.user.id);
+        if (!worker) return res.status(404).json({ message: 'Worker not found.' });
         const today = new Date().toISOString().split('T')[0];
         
         let attendance = await Attendance.findOne({ workerId: worker._id, date: today });
@@ -129,7 +146,12 @@ router.post('/check-out', async (req, res) => {
 // Get Attendance Records (Employer gets all, Worker gets own)
 router.get('/', async (req, res) => {
     try {
+        if (req.user.id === 'master-admin-id' || req.user.id === 'master-admin-id-2') {
+            return res.json([]);
+        }
+
         const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found.' });
         let records;
         
         if (user.role === 'worker') {
