@@ -115,7 +115,7 @@ const PosBilling = () => {
                 
                 // Send WhatsApp receipt if phone is provided
                 if (customerPhone) {
-                    const text = `Hello ${customerName}, here is your receipt from OK ERP! Please see the attached image. Thank you for your purchase!`;
+                    const text = `Hello ${customerName}, here is your receipt from Frndz Telecom! Please see the attached image. Thank you for your purchase!`;
                     const url = `https://wa.me/91${customerPhone}?text=${encodeURIComponent(text)}`;
                     window.open(url, '_blank');
                 }
@@ -232,7 +232,7 @@ const PosBilling = () => {
             <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none', zIndex: -1 }}>
                 <div id="receipt-capture" style={{ display: 'none', width: '380px', background: '#ffffff', color: '#000000', padding: '24px', fontFamily: 'monospace', borderRadius: '0px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '16px', borderBottom: '2px dashed #000', paddingBottom: '12px' }}>
-                        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.6rem', fontWeight: 'bold' }}>OK ERP / Frndz Telecom</h2>
+                        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.6rem', fontWeight: 'bold' }}>Frndz Telecom</h2>
                         <p style={{ margin: '0', fontSize: '0.9rem', color: '#555' }}>Thank you for your business!</p>
                     </div>
                     
@@ -275,7 +275,7 @@ const PosBilling = () => {
                         <strong style={{ fontSize: '1.5rem' }}>₹{finalTotal.toFixed(2)}</strong>
                     </div>
                     <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.8rem', color: '#777' }}>
-                        System generated receipt by OK ERP
+                        System generated receipt
                     </div>
                 </div>
             </div>
