@@ -4,7 +4,7 @@ import './Topbar.css';
 
 const Topbar = ({ toggleSidebar }) => {
   return (
-    <header className="topbar glass-card">
+    <header className="topbar">
       <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
         <button className="icon-btn hamburger-btn" onClick={toggleSidebar}>
            <Menu size={24} />
