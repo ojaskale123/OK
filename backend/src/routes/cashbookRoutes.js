@@ -10,7 +10,7 @@ let masterTxns = [];
 
 // Get all persons (Sidebar of Chat cashbook)
 router.get('/persons', protect, async (req, res) => {
-    if (req.user._id === 'master-admin-id') return res.json(masterPersons);
+    if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') return res.json(masterPersons);
     const plan = req.user.subscription?.plan;
     if(plan === 'Shopkeeper' || plan === 'None') {
         return res.status(403).json({ message: "Cashbook requires Wholesale or Retail Pro plan." });
@@ -20,7 +20,7 @@ router.get('/persons', protect, async (req, res) => {
 });
 
 router.post('/persons', protect, async (req, res) => {
-    if (req.user._id === 'master-admin-id') {
+    if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
         const person = { _id: Date.now().toString(), user: 'master-admin-id', name: req.body.name, contact: req.body.contact, netBalance: 0 };
         masterPersons.push(person);
         global.masterLogs = global.masterLogs || [];
@@ -45,7 +45,7 @@ router.post('/persons', protect, async (req, res) => {
 
 // Get transactions for a specific person
 router.get('/transactions/:personId', protect, async (req, res) => {
-    if (req.user._id === 'master-admin-id') {
+    if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
          return res.json(masterTxns.filter(t => t.person === req.params.personId));
     }
     const tx = await CashbookTransaction.find({ user: req.user.ownerId, person: req.params.personId }).sort({ date: 1 });
@@ -56,7 +56,7 @@ router.get('/transactions/:personId', protect, async (req, res) => {
 router.post('/transactions', protect, async (req, res) => {
     const { personId, amount, type, note } = req.body;
     
-    if (req.user._id === 'master-admin-id') {
+    if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
         const tx = { _id: Date.now().toString(), user: 'master-admin-id', person: personId, amount, type, note, date: new Date().toISOString() };
         masterTxns.push(tx);
         const pIndex = masterPersons.findIndex(p => p._id === personId);

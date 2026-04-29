@@ -10,7 +10,7 @@ router.post('/', protect, async (req, res) => {
     try {
         const { customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode } = req.body;
         
-        if (req.user._id === 'master-admin-id') {
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
             const bill = { _id: Date.now().toString(), customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode, date: new Date().toISOString() };
             masterBills.push(bill);
             global.masterLogs = global.masterLogs || [];
@@ -47,6 +47,21 @@ router.get('/', protect, async (req, res) => {
     if (req.user._id === 'master-admin-id' || req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') return res.json([...masterBills].reverse());
     const bills = await Bill.find({ user: req.user.ownerId }).sort({ date: -1 }).lean();
     res.json(bills);
+});
+
+// Delete a POS Bill
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const bill = await Bill.findById(req.params.id);
+        if (!bill || bill.user.toString() !== req.user.ownerId.toString()) {
+            return res.status(401).json({ message: 'Not authorized or bill not found' });
+        }
+        await Bill.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Bill deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error deleting bill' });
+    }
 });
 
 module.exports = router;

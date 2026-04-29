@@ -25,7 +25,7 @@ router.post('/', protect, async (req, res) => {
     try {
         const { name, barcode, buyPrice, price, retailerPrice, stockQuantity, thresholdAlert, category, image, mfgDate } = req.body;
         
-        if (req.user._id === 'master-admin-id') {
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
             const np = { _id: Date.now().toString(), name, barcode, category, image, buyPrice: Number(buyPrice||0), price: Number(price), retailerPrice: retailerPrice ? Number(retailerPrice) : Number(price), stockQuantity: Number(stockQuantity), thresholdAlert: 10, user: 'master-admin-id', mfgDate: mfgDate || null };
             masterProducts.push(np);
             global.masterLogs = global.masterLogs || [];
@@ -73,7 +73,7 @@ router.put('/:id', protect, async (req, res) => {
     try {
         const { name, barcode, buyPrice, price, retailerPrice, stockQuantity, category, image, mfgDate } = req.body;
         
-        if (req.user._id === 'master-admin-id') {
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
             const index = masterProducts.findIndex(p => p._id === req.params.id);
             if(index !== -1) {
                 masterProducts[index] = { ...masterProducts[index], name: name || masterProducts[index].name, category: category ?? masterProducts[index].category, image: image ?? masterProducts[index].image, barcode: barcode ?? masterProducts[index].barcode, buyPrice: buyPrice ?? masterProducts[index].buyPrice, price: price ?? masterProducts[index].price, retailerPrice: retailerPrice ?? masterProducts[index].retailerPrice, stockQuantity: stockQuantity ?? masterProducts[index].stockQuantity, mfgDate: mfgDate !== undefined ? mfgDate : masterProducts[index].mfgDate };
@@ -114,7 +114,7 @@ router.put('/:id', protect, async (req, res) => {
 
 router.delete('/:id', protect, async (req, res) => {
     try {
-        if (req.user._id === 'master-admin-id') {
+        if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
             const index = masterProducts.findIndex(p => p._id === req.params.id);
             if(index !== -1) {
                 const deletedName = masterProducts[index].name;

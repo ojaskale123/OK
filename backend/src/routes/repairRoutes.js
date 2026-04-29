@@ -31,7 +31,7 @@ router.post('/', protect, async (req, res) => {
         } else {
             // Verify plan for shopkeeper
             // const plan = req.user.subscription?.plan;
-            // if (plan !== 'Wholesale' && plan !== 'Retail Pro' && req.user._id !== 'master-admin-id') {
+            // if (plan !== 'Wholesale' && plan !== 'Retail Pro' && req.user._id !== '000000000000000000000000' && req.user._id !== '111111111111111111111111') {
             //     return res.status(403).json({ message: 'Upgrade plan to manage device repairs' });
             // }
         }
@@ -98,6 +98,29 @@ router.put('/:id', protect, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error updating job' });
+    }
+});
+
+// Delete a repair job
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const job = await RepairJob.findById(req.params.id);
+        if (!job) return res.status(404).json({ message: 'Job not found' });
+        
+        let shopkeeperId = req.user._id;
+        if (req.user.role === 'worker') {
+            shopkeeperId = req.user.employerId;
+        }
+
+        if (job.shopkeeperId.toString() !== shopkeeperId.toString()) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        await RepairJob.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Repair job deleted' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error deleting job' });
     }
 });
 

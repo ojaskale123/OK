@@ -15,4 +15,25 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
+// Delete an activity log
+router.delete('/:id', protect, async (req, res) => {
+    try {
+        const log = await ActivityLog.findById(req.params.id);
+        if (!log || log.user !== req.user.ownerId.toString()) {
+            return res.status(401).json({ message: 'Not authorized or log not found' });
+        }
+        
+        // If this is a POS_BILL, also delete the actual Bill document to fix revenue metrics
+        if (log.actionType === 'POS_BILL' && log.metadata && log.metadata.billId) {
+            const Bill = require('../models/Bill'); // Local require to avoid circular dependency issues if any
+            await Bill.findByIdAndDelete(log.metadata.billId);
+        }
+
+        await ActivityLog.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Log deleted' });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete activity log' });
+    }
+});
+
 module.exports = router;

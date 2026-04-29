@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ScrollText, FileSpreadsheet, Hash, Package, Wallet, ShieldCheck, Box, UserPlus, ArrowRightLeft, CheckCircle } from 'lucide-react';
+import { ScrollText, FileSpreadsheet, Hash, Package, Wallet, ShieldCheck, Box, UserPlus, ArrowRightLeft, CheckCircle, Trash2 } from 'lucide-react';
 
 const History = () => {
     const { token } = useAuth();
     const [history, setHistory] = useState([]);
 
-    useEffect(() => {
+    const fetchHistory = () => {
         fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/history`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
             if(Array.isArray(data)) setHistory(data);
         });
+    };
+
+    useEffect(() => {
+        fetchHistory();
     }, [token]);
+
+    const deleteLog = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this history log?")) return;
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/history/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) fetchHistory();
+        } catch(e) { console.error(e); }
+    };
 
     const totalSales = history
         .filter(log => log.actionType === 'POS_BILL')
@@ -60,6 +75,9 @@ const History = () => {
                                             <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px'}}>
                                                 {new Date(log.date).toLocaleString()}
                                             </div>
+                                            <button onClick={() => deleteLog(log._id)} className="btn" style={{padding: '0.2rem 0.5rem', background: 'rgba(255, 60, 60, 0.1)', color: 'var(--ok-red)', marginTop: '0.5rem', display: 'inline-flex', alignItems: 'center', fontSize: '0.75rem'}}>
+                                                <Trash2 size={12} style={{marginRight: '4px'}}/> Delete
+                                            </button>
                                         </div>
                                     </div>
 
@@ -121,9 +139,12 @@ const History = () => {
                                     </div>
                                 </div>
                                 <div style={{textAlign: 'right'}}>
-                                    <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)'}}>
+                                    <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>
                                         {new Date(log.date).toLocaleString()}
                                     </div>
+                                    <button onClick={() => deleteLog(log._id)} className="btn" style={{padding: '0.2rem 0.5rem', background: 'rgba(255, 60, 60, 0.1)', color: 'var(--ok-red)', display: 'inline-flex', alignItems: 'center', fontSize: '0.75rem'}}>
+                                        <Trash2 size={12} style={{marginRight: '4px'}}/> Delete
+                                    </button>
                                 </div>
                             </div>
                         );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Zap, Plus, Phone, Send, User, CheckCircle } from 'lucide-react';
+import { Zap, Plus, Phone, Send, User, CheckCircle, Trash2 } from 'lucide-react';
 
 const RepairManagement = () => {
   const { token, user } = useAuth();
@@ -71,6 +71,17 @@ const RepairManagement = () => {
           });
           if(res.ok) fetchJobs();
       } catch (err) { console.error(err); }
+  };
+
+  const deleteJob = async (id) => {
+      if (!window.confirm("Are you sure you want to delete this repair job?")) return;
+      try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/repairs/${id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) fetchJobs();
+      } catch(e) { console.error(e); }
   };
 
   const getStatusColor = (status) => {
@@ -308,9 +319,12 @@ const RepairManagement = () => {
                                         <option value="Completed">Completed</option>
                                     </select>
                                 </td>
-                                <td style={{ padding: '1rem' }}>
+                                <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
                                     <button onClick={() => sendWhatsAppUpdate(job)} className="btn btn-secondary" style={{ padding: '0.4rem', border: '1px solid rgba(0, 255, 136, 0.4)', color: 'var(--ok-green)', background: 'rgba(0,255,136,0.05)' }} title="Send WhatsApp Update">
                                         <Send size={16} />
+                                    </button>
+                                    <button onClick={() => deleteJob(job._id)} className="btn btn-secondary" style={{ padding: '0.4rem', border: '1px solid rgba(255, 60, 60, 0.4)', color: 'var(--ok-red)', background: 'rgba(255,60,60,0.05)' }} title="Delete Job">
+                                        <Trash2 size={16} />
                                     </button>
                                 </td>
                             </tr>

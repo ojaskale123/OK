@@ -65,7 +65,7 @@ router.post('/start-trial', protect, async (req, res) => {
     validUntil.setDate(validUntil.getDate() + 3); // 3 Days
     
     // Master backdoor bypass
-    if (req.user._id === 'master-admin-id') {
+    if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
         return res.json({ subscription: { plan: planName, validUntil, isActive: true } });
     }
 

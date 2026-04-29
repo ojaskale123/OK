@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, Users } from 'lucide-react';
+import { UserPlus, Users, Trash2 } from 'lucide-react';
 
 const WorkerManagement = () => {
   const { token } = useAuth();
@@ -74,6 +74,22 @@ const WorkerManagement = () => {
       setLoading(false);
   };
 
+  const deleteWorker = async (id) => {
+      if (!window.confirm("Are you sure you want to delete this worker account?")) return;
+      try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/workers/${id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+              fetchWorkers();
+          } else {
+              const err = await res.json();
+              alert(err.message || 'Failed to delete worker');
+          }
+      } catch (e) { console.error(e); }
+  };
+
   return (
     <div className="animate-fade-in" style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -125,8 +141,13 @@ const WorkerManagement = () => {
                                     <div style={{ fontWeight: 600 }}>{worker.name}</div>
                                     <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{worker.email}</div>
                                 </div>
-                                <div style={{ background: 'rgba(0, 240, 255, 0.1)', color: 'var(--neon-blue)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem' }}>
-                                    Active
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <div style={{ background: 'rgba(0, 240, 255, 0.1)', color: 'var(--neon-blue)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem' }}>
+                                        Active
+                                    </div>
+                                    <button onClick={() => deleteWorker(worker._id)} className="btn btn-secondary" style={{ padding: '0.3rem', border: '1px solid rgba(255, 60, 60, 0.4)', color: 'var(--ok-red)', background: 'rgba(255,60,60,0.05)' }} title="Delete Worker">
+                                        <Trash2 size={14} />
+                                    </button>
                                 </div>
                             </div>
                         ))}
