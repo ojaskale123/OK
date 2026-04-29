@@ -22,7 +22,7 @@ const Dashboard = () => {
              return;
           }
           try {
-              const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/dashboard/stats`, {
+              const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/dashboard/stats`, {
                   headers: { 'Authorization': `Bearer ${token}` }
               });
               const data = await res.json();

@@ -7,7 +7,7 @@ const History = () => {
     const [history, setHistory] = useState([]);
 
     useEffect(() => {
-        fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/history`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/history`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
             if(Array.isArray(data)) setHistory(data);

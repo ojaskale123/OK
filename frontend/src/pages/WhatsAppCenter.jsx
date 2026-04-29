@@ -9,7 +9,7 @@ const WhatsAppCenter = () => {
 
   const fetchJobs = async () => {
       try {
-          const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/repairs`, { headers: { 'Authorization': `Bearer ${token}` } });
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/repairs`, { headers: { 'Authorization': `Bearer ${token}` } });
           if(res.ok) setJobs(await res.json());
       } catch(e) { console.error(e); }
   };
@@ -42,7 +42,7 @@ const WhatsAppCenter = () => {
 
   const markAsComplete = async (jobId) => {
       try {
-          const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/repairs/${jobId}`, {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/repairs/${jobId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
               body: JSON.stringify({ status: 'Completed' })

@@ -10,7 +10,7 @@ const Attendance = () => {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if(res.ok) setLogs(await res.json());
@@ -27,7 +27,7 @@ const Attendance = () => {
     
     navigator.geolocation.getCurrentPosition(async (position) => {
       try {
-        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance/${type}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance/${type}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ lat: position.coords.latitude, lng: position.coords.longitude })

@@ -12,12 +12,12 @@ const WorkerManagement = () => {
 
   const fetchWorkers = async () => {
       try {
-          const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/workers`, {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/workers`, {
               headers: { 'Authorization': `Bearer ${token}` }
           });
           if(res.ok) setWorkers(await res.json());
 
-          const attRes = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance`, {
+          const attRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance`, {
               headers: { 'Authorization': `Bearer ${token}` }
           });
           if(attRes.ok) setAttendanceLogs(await attRes.json());
@@ -35,7 +35,7 @@ const WorkerManagement = () => {
       setSettingLocation(true);
       navigator.geolocation.getCurrentPosition(async (position) => {
           try {
-              const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance/shop-location`, {
+              const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance/shop-location`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                   body: JSON.stringify({ lat: position.coords.latitude, lng: position.coords.longitude })
@@ -54,7 +54,7 @@ const WorkerManagement = () => {
       e.preventDefault();
       setLoading(true);
       try {
-          const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/workers`, {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/workers`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
               body: JSON.stringify(formData)

@@ -12,7 +12,7 @@ export const DataProvider = ({ children }) => {
         if (!token) return;
         try {
             setIsLoadingProducts(true);
-            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/products`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/products`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
