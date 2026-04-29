@@ -41,7 +41,7 @@ const Inventory = () => {
         e.preventDefault();
         setError(null);
         try {
-            const res = await fetch('https://ok-ax2v.onrender.com/api/products', {
+            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/products`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ name, barcode, category, image, buyPrice: Number(buyPrice), price: Number(price), retailerPrice: Number(retailerPrice || price), stockQuantity: Number(stock), mfgDate: category === 'Batteries' ? mfgDate : undefined })
@@ -63,7 +63,7 @@ const Inventory = () => {
 
     const saveEdit = async (id) => {
         try {
-            const res = await fetch(`https://ok-ax2v.onrender.com/api/products/${id}`, {
+            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/products/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(editForm)
@@ -76,7 +76,7 @@ const Inventory = () => {
     const deleteProduct = async (id) => {
         if (!window.confirm("Are you sure you want to delete this product?")) return;
         try {
-            const res = await fetch(`https://ok-ax2v.onrender.com/api/products/${id}`, {
+            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/products/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

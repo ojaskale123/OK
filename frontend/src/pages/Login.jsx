@@ -17,7 +17,7 @@ const Login = () => {
     const body = isLogin ? { email, password } : { name, email, password };
 
     try {
-      const res = await fetch(`https://ok-ax2v.onrender.com${endpoint}`, {
+      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

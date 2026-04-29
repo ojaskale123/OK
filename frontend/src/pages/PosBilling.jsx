@@ -104,7 +104,7 @@ const PosBilling = () => {
         }
 
         try {
-            const res = await fetch('https://ok-ax2v.onrender.com/api/pos', {
+            const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/pos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ customerName, customerPhone, items: cart, subtotal, discountApplied: 0, finalTotal, paymentMode })

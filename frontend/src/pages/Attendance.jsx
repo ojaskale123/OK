@@ -10,7 +10,7 @@ const Attendance = () => {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('https://ok-ax2v.onrender.com/api/attendance', {
+      const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if(res.ok) setLogs(await res.json());
@@ -27,7 +27,7 @@ const Attendance = () => {
     
     navigator.geolocation.getCurrentPosition(async (position) => {
       try {
-        const res = await fetch(`https://ok-ax2v.onrender.com/api/attendance/${type}`, {
+        const res = await fetch(`\${import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com'}/api/attendance/${type}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ lat: position.coords.latitude, lng: position.coords.longitude })
@@ -79,22 +79,24 @@ const Attendance = () => {
       </div>
 
       <div className="glass-card">
-        <h3 style={{ marginBottom: '1rem' }}>My Attendance History</h3>
+        <h3 style={{ marginBottom: '1rem' }}>{user?.role !== 'worker' ? 'Team Attendance History' : 'My Attendance History'}</h3>
         <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
                         <th style={{ padding: '1rem 0' }}>Date</th>
+                        {user?.role !== 'worker' && <th>Worker Name</th>}
                         <th>Check In</th>
                         <th>Check Out</th>
                     </tr>
                 </thead>
                 <tbody>
                     {logs.length === 0 ? (
-                        <tr><td colSpan="3" className="text-secondary" style={{ padding: '2rem 0', textAlign: 'center' }}>No attendance records yet.</td></tr>
+                        <tr><td colSpan={user?.role !== 'worker' ? "4" : "3"} className="text-secondary" style={{ padding: '2rem 0', textAlign: 'center' }}>No attendance records yet.</td></tr>
                     ) : logs.map(log => (
                         <tr key={log._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <td style={{ padding: '1rem 0' }}>{log.date}</td>
+                            {user?.role !== 'worker' && <td>{log.workerId?.name || 'Unknown'}</td>}
                             <td className="amount-receive">{log.checkInTime ? new Date(log.checkInTime).toLocaleTimeString() : '--'}</td>
                             <td className="amount-give">{log.checkOutTime ? new Date(log.checkOutTime).toLocaleTimeString() : '--'}</td>
                         </tr>

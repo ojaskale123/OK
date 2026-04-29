@@ -13,7 +13,8 @@ let masterProducts = [
 router.get('/', protect, async (req, res) => {
     try {
         if (req.user._id === 'master-admin-id') return res.json(masterProducts);
-        const products = await Product.find({ user: req.user.ownerId });
+        // Use .lean() to significantly reduce memory overhead when fetching large sets
+        const products = await Product.find({ user: req.user.ownerId }).lean();
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
