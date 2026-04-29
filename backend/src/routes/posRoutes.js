@@ -44,7 +44,7 @@ router.post('/', protect, async (req, res) => {
 });
 
 router.get('/', protect, async (req, res) => {
-    if (req.user._id === 'master-admin-id') return res.json([...masterBills].reverse());
+    if (req.user._id === 'master-admin-id' || req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') return res.json([...masterBills].reverse());
     const bills = await Bill.find({ user: req.user.ownerId }).sort({ date: -1 }).lean();
     res.json(bills);
 });

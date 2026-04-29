@@ -12,7 +12,7 @@ let masterProducts = [
 
 router.get('/', protect, async (req, res) => {
     try {
-        if (req.user._id === 'master-admin-id') return res.json(masterProducts);
+        if (req.user._id === 'master-admin-id' || req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') return res.json(masterProducts);
         // Use .lean() to significantly reduce memory overhead when fetching large sets
         const products = await Product.find({ user: req.user.ownerId }).lean();
         res.json(products);
