@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
             const masterId = isMaster1 ? 'master-admin-id' : 'master-admin-id-2';
             return res.json({
                 _id: masterId,
-                name: isMaster1 ? 'Ojas (Testing Demo)' : 'Frndz Telecom (Testing Demo)',
+                name: isMaster1 ? 'Ojas' : 'Frndz Telecom',
                 email: isMaster1 ? 'ojask68@gmail.com' : 'frndztelecomm61@gmail.com',
                 role: 'admin',
                 token: generateToken(masterId),
@@ -70,7 +70,7 @@ router.post('/login', async (req, res) => {
             const masterId = isMaster1 ? 'master-admin-id' : 'master-admin-id-2';
             return res.json({
                 _id: masterId,
-                name: isMaster1 ? 'Ojas (Testing Demo)' : 'Frndz Telecom (Testing Demo)',
+                name: isMaster1 ? 'Ojas' : 'Frndz Telecom',
                 email: isMaster1 ? 'ojask68@gmail.com' : 'frndztelecomm61@gmail.com',
                 role: 'admin',
                 token: generateToken(masterId),

@@ -134,7 +134,7 @@ const Cashbook = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', flex: 1, gap: '1.5rem', overflow: 'hidden' }}>
+            <div className="pos-layout" style={{ flex: 1, overflow: 'hidden' }}>
                 {/* Contacts Sidebar */}
                 <div className="glass-card" style={{ width: '320px', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
                     <form onSubmit={addPerson} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -211,7 +211,7 @@ const Cashbook = () => {
 
                             {/* Chat Input */}
                             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-                                <form onSubmit={sendTransaction} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <form onSubmit={sendTransaction} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
                                     <select className="form-input" style={{ width: '150px', background: type === 'receive' ? 'var(--ok-green-glow)' : 'var(--ok-red-glow)', border: `1px solid ${type === 'receive' ? 'var(--ok-green)' : 'var(--ok-red)'}`, color: '#fff' }} value={type} onChange={e=>setType(e.target.value)}>
                                         <option value="receive">I Got (Income)</option>
                                         <option value="give">I Gave (Expense)</option>

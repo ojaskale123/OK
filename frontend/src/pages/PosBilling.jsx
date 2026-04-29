@@ -135,7 +135,7 @@ const PosBilling = () => {
     }
 
     return (
-        <div className="animate-fade-in" style={{display: 'flex', gap: '2rem'}}>
+        <div className="animate-fade-in pos-layout">
             <div style={{flex: 2}}>
                 <h2 className="text-gradient" style={{marginBottom: '1rem'}}>Point of Sale (POS)</h2>
                 {successMsg && <div className="glass-card" style={{borderColor: 'var(--ok-green)', marginBottom: '1rem'}}><p className="amount-receive">{successMsg}</p></div>}
@@ -169,7 +169,7 @@ const PosBilling = () => {
                     <Search size={18} className="text-secondary" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 </div>
                 
-                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', maxHeight: 'calc(100vh - 280px)', overflowY: 'auto', paddingRight: '10px'}}>
+                <div className="pos-grid" style={{maxHeight: 'calc(100vh - 280px)', overflowY: 'auto', paddingRight: '10px'}}>
                     {filteredProducts.map(p => (
                         <div key={p._id} className="glass-card" style={{cursor: 'pointer', padding: '0', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column'}} onClick={() => addToCart(p)}>
                             {p.image ? (
