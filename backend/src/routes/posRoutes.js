@@ -11,6 +11,7 @@ router.post('/', protect, async (req, res) => {
         const { customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode } = req.body;
         
         if (req.user._id === '000000000000000000000000' || req.user._id === '111111111111111111111111') {
+
             const bill = { _id: Date.now().toString(), customerName, customerPhone, items, subtotal, discountApplied, finalTotal, paymentMode, date: new Date().toISOString() };
             masterBills.push(bill);
             global.masterLogs = global.masterLogs || [];

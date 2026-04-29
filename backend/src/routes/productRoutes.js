@@ -4,11 +4,7 @@ const Product = require('../models/Product');
 const ActivityLog = require('../models/ActivityLog');
 const { protect } = require('../middleware/authMiddleware');
 
-let masterProducts = [
-    { _id: '1', barcode: 'IPH12', name: 'iPhone 12 (Used)', category: 'Second Hand Mobile', image: 'https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=300', buyPrice: 22000, price: 25000, stockQuantity: 3, thresholdAlert: 2, user: 'master-admin-id' },
-    { _id: '2', barcode: 'BAT123', name: 'Samsung Battery', category: 'Batteries', image: 'https://images.unsplash.com/photo-1608223652613-294723907727?w=300', buyPrice: 400, price: 800, stockQuantity: 15, thresholdAlert: 5, user: 'master-admin-id' },
-    { _id: '3', barcode: 'ACC99', name: 'Fast Charger', category: 'Accessories', image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=300', buyPrice: 200, price: 500, stockQuantity: 40, thresholdAlert: 10, user: 'master-admin-id' }
-];
+let masterProducts = [];
 
 router.get('/', protect, async (req, res) => {
     try {
