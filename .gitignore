@@ -1,0 +1,5 @@
+.tools/
+node_modules/
+.env
+.env.local
+backend/credentials.json
