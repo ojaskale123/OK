@@ -175,13 +175,13 @@ const JobSheet = () => {
     return null;
   };
 
+  // Bulletproof canvas capture using dedicated static HTML container
   const captureJobSheet = useCallback(async () => {
-    const formEl = document.getElementById('job-sheet-full-form');
-    if (!formEl) return null;
+    const printEl = document.getElementById('job-sheet-printable-area');
+    if (!printEl) return null;
 
-    formEl.classList.add('capturing-mode');
     try {
-      const canvas = await html2canvas(formEl, {
+      const canvas = await html2canvas(printEl, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
@@ -192,8 +192,6 @@ const JobSheet = () => {
     } catch (err) {
       console.error('Could not create job sheet image', err);
       return null;
-    } finally {
-      formEl.classList.remove('capturing-mode');
     }
   }, []);
 
@@ -256,78 +254,6 @@ const JobSheet = () => {
     }
   };
 
-  // Helper renderer for input fields - guarantees 38px height & 0 top/bottom padding to prevent font clipping
-  const renderInput = (field, placeholder, extraStyle = {}, type = 'text') => {
-    const val = formData[field] || '';
-    const styleObj = {
-      height: '38px',
-      padding: '0 10px',
-      lineHeight: '38px',
-      boxSizing: 'border-box',
-      ...extraStyle,
-    };
-    return (
-      <div className="js-field-wrapper">
-        <div
-          className="capture-val-display"
-          style={{
-            display: 'none',
-            height: '38px',
-            padding: '0 10px',
-            lineHeight: '38px',
-            fontSize: extraStyle.fontSize || '13px',
-            fontWeight: extraStyle.fontWeight || 600,
-            color: extraStyle.color || '#0f172a',
-            textAlign: extraStyle.textAlign || 'left',
-            textTransform: extraStyle.textTransform || 'none',
-          }}
-        >
-          {val || placeholder || '-'}
-        </div>
-        <input
-          className="js-input"
-          type={type}
-          style={styleObj}
-          value={val}
-          onChange={(e) => updateField(field, e.target.value)}
-          placeholder={placeholder}
-        />
-      </div>
-    );
-  };
-
-  // Helper renderer for textarea fields - prevents text clipping
-  const renderTextarea = (field, placeholder, rows = 2, extraStyle = {}) => {
-    const val = formData[field] || '';
-    const minH = Math.max(rows * 24, 60);
-    return (
-      <div className="js-field-wrapper">
-        <div
-          className="capture-val-display capture-textarea-display"
-          style={{
-            display: 'none',
-            minHeight: `${minH}px`,
-            padding: '8px 10px',
-            lineHeight: '1.6',
-            fontSize: extraStyle.fontSize || '13px',
-            fontWeight: extraStyle.fontWeight || 600,
-            color: extraStyle.color || '#0f172a',
-          }}
-        >
-          {val || placeholder || '-'}
-        </div>
-        <textarea
-          className="js-textarea"
-          rows={rows}
-          style={{ minHeight: `${minH}px`, padding: '8px 10px', lineHeight: '1.6', ...extraStyle }}
-          value={val}
-          onChange={(e) => updateField(field, e.target.value)}
-          placeholder={placeholder}
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="animate-fade-in job-sheet-page" style={{ padding: '1.5rem', minHeight: '100vh', backgroundColor: 'var(--bg-color, #0f172a)' }}>
       <style>{`
@@ -355,23 +281,17 @@ const JobSheet = () => {
           margin-bottom: 8px;
         }
 
-        .js-field-wrapper {
-          width: 100%;
-          box-sizing: border-box;
-        }
-
         .js-input {
           width: 100%;
-          height: 38px !important;
-          padding: 0 10px !important;
-          line-height: 38px !important;
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
+          padding: 8px 10px;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
-          box-sizing: border-box !important;
+          min-height: 38px;
+          box-sizing: border-box;
           transition: all 0.2s ease;
         }
 
@@ -387,13 +307,13 @@ const JobSheet = () => {
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 8px 10px !important;
+          padding: 8px 10px;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
-          min-height: 60px !important;
-          line-height: 1.6 !important;
-          box-sizing: border-box !important;
+          min-height: 60px;
+          line-height: 1.5;
+          box-sizing: border-box;
           resize: vertical;
           transition: all 0.2s ease;
         }
@@ -403,38 +323,6 @@ const JobSheet = () => {
           border-color: #2563eb;
           outline: none;
           box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
-        }
-
-        /* HTML2Canvas Clean Capture Mode - Guarantees ZERO text clipping vertically or horizontally */
-        .capturing-mode .js-input,
-        .capturing-mode .js-textarea {
-          display: none !important;
-        }
-
-        .capturing-mode .capture-val-display {
-          display: flex !important;
-          align-items: center !important;
-          width: 100% !important;
-          height: 38px !important;
-          padding: 0 10px !important;
-          line-height: 38px !important;
-          background: #f8fafc !important;
-          border: 1px solid #cbd5e1 !important;
-          border-radius: 6px !important;
-          box-sizing: border-box !important;
-          overflow: visible !important;
-        }
-
-        .capturing-mode .capture-textarea-display {
-          display: block !important;
-          height: auto !important;
-          align-items: flex-start !important;
-          padding: 8px 10px !important;
-          line-height: 1.6 !important;
-        }
-
-        .capturing-mode .no-capture {
-          display: none !important;
         }
       `}</style>
 
@@ -503,21 +391,21 @@ const JobSheet = () => {
         <div style={{ maxWidth: '920px', margin: '0 auto 1.5rem', padding: '1.25rem', background: 'var(--surface-color-1, #1e293b)', borderRadius: '12px', border: '1px solid var(--border-color, #334155)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
           <div>
             <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Logo Image URL</label>
-            {renderInput('logoUrl', 'https://.../logo.png', {}, 'url')}
+            <input className="js-input" type="url" value={formData.logoUrl} onChange={(e) => updateField('logoUrl', e.target.value)} placeholder="https://.../logo.png" />
           </div>
           <div>
             <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Instagram QR URL</label>
-            {renderInput('instaQrUrl', 'https://.../insta-qr.png', {}, 'url')}
+            <input className="js-input" type="url" value={formData.instaQrUrl} onChange={(e) => updateField('instaQrUrl', e.target.value)} placeholder="https://.../insta-qr.png" />
           </div>
           <div>
             <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Google QR URL</label>
-            {renderInput('googleQrUrl', 'https://.../google-qr.png', {}, 'url')}
+            <input className="js-input" type="url" value={formData.googleQrUrl} onChange={(e) => updateField('googleQrUrl', e.target.value)} placeholder="https://.../google-qr.png" />
           </div>
         </div>
       )}
 
-      {/* Unified Full Job Sheet Document Form */}
-      <div id="job-sheet-full-form" className="job-sheet-container">
+      {/* Editable Form Document */}
+      <div className="job-sheet-container">
         {/* Header Block: Logo, Shop Info, Job Number & Dates */}
         <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 180px', gap: '15px', marginBottom: '15px', borderBottom: '2px solid #0f172a', paddingBottom: '12px', alignItems: 'center' }}>
           {/* Logo Display */}
@@ -531,24 +419,51 @@ const JobSheet = () => {
 
           {/* Shop / Service Center Information Inputs */}
           <div>
-            {renderInput('serviceCenterName', 'SERVICE CENTER NAME', { fontSize: '16px', fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', marginBottom: '4px' })}
+            <input
+              className="js-input"
+              style={{ fontSize: '16px', fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', marginBottom: '4px' }}
+              value={formData.serviceCenterName}
+              onChange={(e) => updateField('serviceCenterName', e.target.value)}
+              placeholder="SERVICE CENTER NAME"
+            />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-              {renderInput('serviceCenterContact', 'Phone / Contact', { fontSize: '12px' })}
-              {renderInput('serviceCenterEmail', 'Service Center Email', { fontSize: '12px' })}
+              <input
+                className="js-input"
+                style={{ fontSize: '12px' }}
+                value={formData.serviceCenterContact}
+                onChange={(e) => updateField('serviceCenterContact', e.target.value)}
+                placeholder="Phone / Contact"
+              />
+              <input
+                className="js-input"
+                style={{ fontSize: '12px' }}
+                value={formData.serviceCenterEmail}
+                onChange={(e) => updateField('serviceCenterEmail', e.target.value)}
+                placeholder="Service Center Email"
+              />
             </div>
-            <div style={{ marginTop: '4px' }}>
-              {renderInput('serviceCenterAddress', 'Shop Address', { fontSize: '11px' })}
-            </div>
+            <input
+              className="js-input"
+              style={{ fontSize: '11px', marginTop: '4px' }}
+              value={formData.serviceCenterAddress}
+              onChange={(e) => updateField('serviceCenterAddress', e.target.value)}
+              placeholder="Shop Address"
+            />
           </div>
 
           {/* Job Reference Details */}
           <div style={{ background: '#f8fafc', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', textAlign: 'center' }}>
             <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px' }}>JOB SHEET</div>
             <div style={{ fontSize: '10px', fontWeight: 600, color: '#475569', marginBottom: '2px' }}>Job No.</div>
-            {renderInput('jobNumber', 'JS-0001', { textAlign: 'center', fontWeight: 'bold', color: '#0f172a', fontSize: '13px' })}
+            <input
+              className="js-input"
+              style={{ textAlign: 'center', fontWeight: 'bold', color: '#0f172a', fontSize: '13px' }}
+              value={formData.jobNumber}
+              onChange={(e) => updateField('jobNumber', e.target.value)}
+              placeholder="JS-0001"
+            />
             <button
               type="button"
-              className="no-capture"
               onClick={resetJobCounterToOne}
               title="Reset counter to JS-0001"
               style={{
@@ -572,19 +487,19 @@ const JobSheet = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', marginBottom: '15px' }}>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '2px' }}>DATE</label>
-            {renderInput('jobDate', '', {}, 'date')}
+            <input className="js-input" type="date" value={formData.jobDate} onChange={(e) => updateField('jobDate', e.target.value)} />
           </div>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '2px' }}>ACCEPTANCE TIME</label>
-            {renderInput('acceptanceTime', '', {}, 'time')}
+            <input className="js-input" type="time" value={formData.acceptanceTime} onChange={(e) => updateField('acceptanceTime', e.target.value)} />
           </div>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '2px' }}>REPAIR TYPE</label>
-            {renderInput('repairType', 'e.g. Display Replacement')}
+            <input className="js-input" type="text" value={formData.repairType} onChange={(e) => updateField('repairType', e.target.value)} placeholder="e.g. Display Replacement" />
           </div>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '2px' }}>RECEIVED BY</label>
-            {renderInput('repairSenderInfo', 'Staff Name')}
+            <input className="js-input" type="text" value={formData.repairSenderInfo} onChange={(e) => updateField('repairSenderInfo', e.target.value)} placeholder="Staff Name" />
           </div>
         </div>
 
@@ -594,23 +509,23 @@ const JobSheet = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Customer Full Name *</label>
-              {renderInput('customerName', 'Enter customer name')}
+              <input className="js-input" type="text" value={formData.customerName} onChange={(e) => updateField('customerName', e.target.value)} placeholder="Enter customer name" />
             </div>
             <div>
-              <label style={{ fontSize: '11px', fontWeight 600, color: '#2563eb' }}>Primary Phone (WhatsApp) *</label>
-              {renderInput('customerPhone', '10-digit mobile number', { borderColor: '#3b82f6' }, 'tel')}
+              <label style={{ fontSize: '11px', fontWeight: 600, color: '#2563eb' }}>Primary Phone (WhatsApp) *</label>
+              <input className="js-input" type="tel" value={formData.customerPhone} onChange={(e) => updateField('customerPhone', e.target.value)} placeholder="10-digit mobile number" style={{ borderColor: '#3b82f6' }} />
             </div>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Secondary Phone</label>
-              {renderInput('customerPhone2', 'Alternate number', {}, 'tel')}
+              <input className="js-input" type="tel" value={formData.customerPhone2} onChange={(e) => updateField('customerPhone2', e.target.value)} placeholder="Alternate number" />
             </div>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Customer Email</label>
-              {renderInput('customerEmail', 'Customer email', {}, 'email')}
+              <input className="js-input" type="email" value={formData.customerEmail} onChange={(e) => updateField('customerEmail', e.target.value)} placeholder="Customer email" />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Customer Address</label>
-              {renderInput('customerAddress', 'Customer full address')}
+              <input className="js-input" type="text" value={formData.customerAddress} onChange={(e) => updateField('customerAddress', e.target.value)} placeholder="Customer full address" />
             </div>
           </div>
         </div>
@@ -621,15 +536,15 @@ const JobSheet = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Product Type</label>
-              {renderInput('productType', 'e.g. SmartPhone, Laptop')}
+              <input className="js-input" type="text" value={formData.productType} onChange={(e) => updateField('productType', e.target.value)} placeholder="e.g. SmartPhone, Laptop" />
             </div>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Brand & Model</label>
-              {renderInput('productInfo', 'e.g. iPhone 13 Pro, Samsung S23')}
+              <input className="js-input" type="text" value={formData.productInfo} onChange={(e) => updateField('productInfo', e.target.value)} placeholder="e.g. iPhone 13 Pro, Samsung S23" />
             </div>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>IMEI / Serial No.</label>
-              {renderInput('productImei', 'Enter 15-digit IMEI')}
+              <input className="js-input" type="text" value={formData.productImei} onChange={(e) => updateField('productImei', e.target.value)} placeholder="Enter 15-digit IMEI" />
             </div>
           </div>
         </div>
@@ -637,7 +552,13 @@ const JobSheet = () => {
         {/* Reported Issue / Complaint */}
         <div style={{ marginBottom: '15px' }}>
           <div className="job-sheet-section-title">Reported Problem / Customer Complaint</div>
-          {renderTextarea('deviceIssue', 'Describe customer complaint in detail (e.g. Display broken, not charging, water damage)...', 3)}
+          <textarea
+            className="js-textarea"
+            rows="3"
+            value={formData.deviceIssue}
+            onChange={(e) => updateField('deviceIssue', e.target.value)}
+            placeholder="Describe customer complaint in detail (e.g. Display broken, not charging, water damage)..."
+          />
         </div>
 
         {/* Checklist Grid */}
@@ -724,11 +645,238 @@ const JobSheet = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Handset Physical Condition</label>
-            {renderTextarea('handsetAppearance', 'Scratches, dents, missing screws...', 2)}
+            <textarea
+              className="js-textarea"
+              rows="2"
+              value={formData.handsetAppearance}
+              onChange={(e) => updateField('handsetAppearance', e.target.value)}
+              placeholder="Scratches, dents, missing screws..."
+            />
           </div>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>Remarks / Estimated Cost</label>
-            {renderTextarea('remarks', 'Additional notes or cost estimate...', 2)}
+            <textarea
+              className="js-textarea"
+              rows="2"
+              value={formData.remarks}
+              onChange={(e) => updateField('remarks', e.target.value)}
+              placeholder="Additional notes or cost estimate..."
+            />
+          </div>
+        </div>
+
+        {/* Signatures */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px', paddingTop: '15px', borderTop: '1px dashed #cbd5e1' }}>
+          <div style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px', minHeight: '60px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '35px' }}>CUSTOMER SIGNATURE</div>
+            <div style={{ borderTop: '1px solid #000' }}></div>
+          </div>
+          <div style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px', minHeight: '60px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '35px' }}>SERVICE CENTER SIGNATURE</div>
+            <div style={{ borderTop: '1px solid #000' }}></div>
+          </div>
+        </div>
+
+        {/* QR Codes Branding Footer */}
+        {(formData.instaQrUrl || formData.googleQrUrl) && (
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+            {formData.instaQrUrl && (
+              <div style={{ textAlign: 'center' }}>
+                <img src={formData.instaQrUrl} alt="Instagram QR" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                <div style={{ fontSize: '9px', fontWeight: 600, color: '#475569' }}>Instagram</div>
+              </div>
+            )}
+            {formData.googleQrUrl && (
+              <div style={{ textAlign: 'center' }}>
+                <img src={formData.googleQrUrl} alt="Google QR" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                <div style={{ fontSize: '9px', fontWeight: 600, color: '#475569' }}>Google Review</div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Hidden Static Canvas Capture Target (Zero Input Tags - Solves html2canvas clipping 100%) */}
+      <div
+        id="job-sheet-printable-area"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '0',
+          width: '850px',
+          background: '#ffffff',
+          color: '#000000',
+          borderRadius: '12px',
+          padding: '24px',
+          fontFamily: "'Outfit', system-ui, sans-serif",
+          boxSizing: 'border-box',
+          zIndex: -1,
+        }}
+      >
+        {/* Header Block */}
+        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 180px', gap: '15px', marginBottom: '15px', borderBottom: '2px solid #0f172a', paddingBottom: '12px', alignItems: 'center' }}>
+          <div style={{ width: '80px', height: '70px', border: '1px solid #cbd5e1', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '4px', background: '#ffffff' }}>
+            {formData.logoUrl ? (
+              <img src={formData.logoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            ) : (
+              <div style={{ fontSize: '10px', color: '#64748b', textAlign: 'center', fontWeight: 600 }}>NO LOGO</div>
+            )}
+          </div>
+          <div>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', marginBottom: '4px' }}>
+              {formData.serviceCenterName || user?.shopName || 'SERVICE CENTER'}
+            </div>
+            <div style={{ fontSize: '12px', color: '#334155', fontWeight: 500 }}>
+              {formData.serviceCenterContact && <span>Contact: {formData.serviceCenterContact} </span>}
+              {formData.serviceCenterEmail && <span> | Email: {formData.serviceCenterEmail}</span>}
+            </div>
+            {formData.serviceCenterAddress && <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>{formData.serviceCenterAddress}</div>}
+          </div>
+          <div style={{ background: '#f8fafc', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', textAlign: 'center' }}>
+            <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px' }}>JOB SHEET</div>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: '#475569', marginBottom: '2px' }}>Job No.</div>
+            <div style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '15px' }}>{formData.jobNumber || 'JS-0001'}</div>
+          </div>
+        </div>
+
+        {/* Date & Time Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', marginBottom: '15px', background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>DATE</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.jobDate || '-'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>ACCEPTANCE TIME</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.acceptanceTime || '-'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>REPAIR TYPE</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.repairType || '-'}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>RECEIVED BY</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.repairSenderInfo || '-'}</div>
+          </div>
+        </div>
+
+        {/* Customer Information */}
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
+            Customer Information
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: '#ffffff', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
+            <div>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>Customer Name: </span>
+              <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.customerName || '-'}</strong>
+            </div>
+            <div>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>Phone Number: </span>
+              <strong style={{ fontSize: '13px', color: '#2563eb' }}>{formData.customerPhone || '-'}</strong>
+            </div>
+            {formData.customerPhone2 && (
+              <div>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>Secondary Phone: </span>
+                <span style={{ fontSize: '12px', color: '#0f172a' }}>{formData.customerPhone2}</span>
+              </div>
+            )}
+            {formData.customerEmail && (
+              <div>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>Email: </span>
+                <span style={{ fontSize: '12px', color: '#0f172a' }}>{formData.customerEmail}</span>
+              </div>
+            )}
+            {formData.customerAddress && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>Address: </span>
+                <span style={{ fontSize: '12px', color: '#0f172a' }}>{formData.customerAddress}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Device & Product Details */}
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
+            Device & Product Details
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', background: '#ffffff', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
+            <div>
+              <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Product Type</span>
+              <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.productType || 'Mobile Phone'}</strong>
+            </div>
+            <div>
+              <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Brand & Model</span>
+              <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.productInfo || '-'}</strong>
+            </div>
+            <div>
+              <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>IMEI / Serial No.</span>
+              <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.productImei || '-'}</strong>
+            </div>
+          </div>
+        </div>
+
+        {/* Reported Problem / Customer Complaint */}
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
+            Reported Problem / Customer Complaint
+          </div>
+          <div style={{ padding: '10px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '6px', fontSize: '13px', color: '#92400e', fontWeight: 600, minHeight: '40px', whiteSpace: 'pre-wrap' }}>
+            {formData.deviceIssue || 'No specific complaint entered.'}
+          </div>
+        </div>
+
+        {/* Inward Condition Checklist */}
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
+            Device Inward Condition Checklist
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
+            {CHECKLIST_ITEMS.map((item) => {
+              const status = checklist[item] || 'N/A';
+              const bg = status === 'Yes' ? '#16a34a' : status === 'No' ? '#dc2626' : '#94a3b8';
+              return (
+                <div key={item} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 8px', borderBottom: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 500, color: '#334155' }}>{item}</span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: bg, color: '#ffffff' }}>
+                    {status}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Accessories Received */}
+        <div style={{ marginBottom: '15px' }}>
+          <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
+            Accessories Received
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', padding: '6px' }}>
+            {ACCESSORIES_ITEMS.map((item) => {
+              const isChecked = accessories[item] === 'Yes';
+              return (
+                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: isChecked ? '#16a34a' : '#94a3b8' }}>
+                  <span>{isChecked ? '☑' : '☒'}</span>
+                  <span>{item}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Handset Appearance & Remarks */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Handset Physical Condition</div>
+            <div style={{ padding: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', color: '#0f172a', minHeight: '40px', whiteSpace: 'pre-wrap' }}>
+              {formData.handsetAppearance || 'None'}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Remarks / Estimated Cost</div>
+            <div style={{ padding: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', color: '#0f172a', minHeight: '40px', whiteSpace: 'pre-wrap' }}>
+              {formData.remarks || 'None'}
+            </div>
           </div>
         </div>
 
