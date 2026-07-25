@@ -150,13 +150,23 @@ const JobSheet = () => {
     return normalizeIndianPhone(formData.customerPhone);
   }, [formData.customerPhone]);
 
-  const saveJobSheetToBackend = async () => {
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const saveJobSheetToBackend = async (imageDataBase64 = '') => {
     if (!token) return null;
     try {
       const payload = {
         ...formData,
         checklist,
         accessories,
+        imageData: imageDataBase64,
       };
       const res = await apiFetch('/api/job-sheet', {
         method: 'POST',
@@ -200,9 +210,14 @@ const JobSheet = () => {
     setErrorMessage('');
     setIsGenerating(true);
 
-    await saveJobSheetToBackend();
-
     const blob = await captureJobSheet();
+    let imageBase64 = '';
+    if (blob) {
+      imageBase64 = await blobToBase64(blob);
+    }
+
+    await saveJobSheetToBackend(imageBase64);
+
     setIsGenerating(false);
 
     if (!blob) {
@@ -232,20 +247,36 @@ const JobSheet = () => {
     setIsGenerating(true);
 
     try {
-      // Save Job Sheet to database & obtain public ID
-      const savedSheet = await saveJobSheetToBackend();
+      // 1. Capture image blob and convert to Base64
+      const blob = await captureJobSheet();
+      let imageBase64 = '';
+      if (blob) {
+        imageBase64 = await blobToBase64(blob);
+      }
+
+      // 2. Save Job Sheet to database with Base64 image & obtain public ID
+      const savedSheet = await saveJobSheetToBackend(imageBase64);
       const sheetId = savedSheet?._id;
 
-      const publicLink = sheetId
+      const pageLink = sheetId
         ? `${window.location.origin}/job-sheet-view/${sheetId}`
         : `${window.location.origin}/job-sheet`;
 
+      const apiBase = import.meta.env.VITE_API_URL || 'https://ok-ax2v.onrender.com';
+      const imageLink = sheetId
+        ? `${apiBase}/api/job-sheet/image/${sheetId}`
+        : null;
+
       const shopName = formData.serviceCenterName || user?.shopName || 'our shop';
-      const whatsappText = `Hi, this is ${shopName}! This is your receipt info:\n${publicLink}`;
+
+      let whatsappText = `Hi, this is ${shopName}! Here is your receipt & job sheet info:\n\n📄 View Complete Job Sheet:\n${pageLink}`;
+      if (imageLink) {
+        whatsappText += `\n\n🖼️ View Job Sheet Image:\n${imageLink}`;
+      }
 
       openWhatsApp(formData.customerPhone, whatsappText);
       incrementJobCounter();
-      setSuccessMessage(`Job sheet saved & redirected to WhatsApp for customer (${formData.customerPhone})!`);
+      setSuccessMessage(`Job sheet & image link sent via WhatsApp to customer (${formData.customerPhone})!`);
     } catch (err) {
       console.error('Failed to send job sheet via WhatsApp', err);
       setErrorMessage('Could not process WhatsApp redirection. Please try again.');
@@ -283,15 +314,17 @@ const JobSheet = () => {
 
         .js-input {
           width: 100%;
+          height: 38px !important;
+          padding: 0 12px !important;
+          line-height: 38px !important;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 8px 10px;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
-          min-height: 38px;
-          box-sizing: border-box;
+          box-sizing: border-box !important;
           transition: all 0.2s ease;
         }
 
@@ -307,8 +340,9 @@ const JobSheet = () => {
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 8px 10px;
+          padding: 8px 12px !important;
           font-size: 13px;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
           color: #0f172a;
           font-weight: 500;
           min-height: 60px;
@@ -696,21 +730,23 @@ const JobSheet = () => {
         )}
       </div>
 
-      {/* Hidden Static Canvas Capture Target (Zero Input Tags - Solves html2canvas clipping 100%) */}
+      {/* Hidden Static Canvas Capture Target (Positioned top:0, left:0, opacity:0 to allow full font layout calculation) */}
       <div
         id="job-sheet-printable-area"
         style={{
           position: 'fixed',
-          left: '-9999px',
           top: '0',
+          left: '0',
           width: '850px',
           background: '#ffffff',
           color: '#000000',
           borderRadius: '12px',
           padding: '24px',
-          fontFamily: "'Outfit', system-ui, sans-serif",
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           boxSizing: 'border-box',
-          zIndex: -1,
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: -9999,
         }}
       >
         {/* Header Block */}
@@ -726,11 +762,11 @@ const JobSheet = () => {
             <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', marginBottom: '4px' }}>
               {formData.serviceCenterName || user?.shopName || 'SERVICE CENTER'}
             </div>
-            <div style={{ fontSize: '12px', color: '#334155', fontWeight: 500 }}>
+            <div style={{ fontSize: '12px', color: '#334155', fontWeight: 500, lineHeight: '1.6' }}>
               {formData.serviceCenterContact && <span>Contact: {formData.serviceCenterContact} </span>}
               {formData.serviceCenterEmail && <span> | Email: {formData.serviceCenterEmail}</span>}
             </div>
-            {formData.serviceCenterAddress && <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>{formData.serviceCenterAddress}</div>}
+            {formData.serviceCenterAddress && <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px', lineHeight: '1.5' }}>{formData.serviceCenterAddress}</div>}
           </div>
           <div style={{ background: '#f8fafc', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', textAlign: 'center' }}>
             <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px' }}>JOB SHEET</div>
@@ -743,19 +779,19 @@ const JobSheet = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', marginBottom: '15px', background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
           <div>
             <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>DATE</div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.jobDate || '-'}</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px', lineHeight: '1.5' }}>{formData.jobDate || '-'}</div>
           </div>
           <div>
             <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>ACCEPTANCE TIME</div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.acceptanceTime || '-'}</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px', lineHeight: '1.5' }}>{formData.acceptanceTime || '-'}</div>
           </div>
           <div>
             <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>REPAIR TYPE</div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.repairType || '-'}</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px', lineHeight: '1.5' }}>{formData.repairType || '-'}</div>
           </div>
           <div>
             <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>RECEIVED BY</div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>{formData.repairSenderInfo || '-'}</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', marginTop: '2px', lineHeight: '1.5' }}>{formData.repairSenderInfo || '-'}</div>
           </div>
         </div>
 
@@ -764,29 +800,29 @@ const JobSheet = () => {
           <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
             Customer Information
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: '#ffffff', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
-            <div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: '#ffffff', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
+            <div style={{ lineHeight: '1.6' }}>
               <span style={{ fontSize: '11px', color: '#64748b' }}>Customer Name: </span>
               <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.customerName || '-'}</strong>
             </div>
-            <div>
+            <div style={{ lineHeight: '1.6' }}>
               <span style={{ fontSize: '11px', color: '#64748b' }}>Phone Number: </span>
               <strong style={{ fontSize: '13px', color: '#2563eb' }}>{formData.customerPhone || '-'}</strong>
             </div>
             {formData.customerPhone2 && (
-              <div>
+              <div style={{ lineHeight: '1.6' }}>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>Secondary Phone: </span>
                 <span style={{ fontSize: '12px', color: '#0f172a' }}>{formData.customerPhone2}</span>
               </div>
             )}
             {formData.customerEmail && (
-              <div>
+              <div style={{ lineHeight: '1.6' }}>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>Email: </span>
                 <span style={{ fontSize: '12px', color: '#0f172a' }}>{formData.customerEmail}</span>
               </div>
             )}
             {formData.customerAddress && (
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div style={{ gridColumn: '1 / -1', lineHeight: '1.6' }}>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>Address: </span>
                 <span style={{ fontSize: '12px', color: '#0f172a' }}>{formData.customerAddress}</span>
               </div>
@@ -799,16 +835,16 @@ const JobSheet = () => {
           <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
             Device & Product Details
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', background: '#ffffff', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
-            <div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', background: '#ffffff', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px' }}>
+            <div style={{ lineHeight: '1.6' }}>
               <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Product Type</span>
               <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.productType || 'Mobile Phone'}</strong>
             </div>
-            <div>
+            <div style={{ lineHeight: '1.6' }}>
               <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Brand & Model</span>
               <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.productInfo || '-'}</strong>
             </div>
-            <div>
+            <div style={{ lineHeight: '1.6' }}>
               <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>IMEI / Serial No.</span>
               <strong style={{ fontSize: '13px', color: '#0f172a' }}>{formData.productImei || '-'}</strong>
             </div>
@@ -820,7 +856,7 @@ const JobSheet = () => {
           <div style={{ background: '#f1f5f9', color: '#0f172a', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '6px 10px', borderLeft: '4px solid #2563eb', marginBottom: '8px' }}>
             Reported Problem / Customer Complaint
           </div>
-          <div style={{ padding: '10px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '6px', fontSize: '13px', color: '#92400e', fontWeight: 600, minHeight: '40px', whiteSpace: 'pre-wrap' }}>
+          <div style={{ padding: '10px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '6px', fontSize: '13px', color: '#92400e', fontWeight: 600, minHeight: '40px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
             {formData.deviceIssue || 'No specific complaint entered.'}
           </div>
         </div>
@@ -868,13 +904,13 @@ const JobSheet = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
           <div>
             <div style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Handset Physical Condition</div>
-            <div style={{ padding: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', color: '#0f172a', minHeight: '40px', whiteSpace: 'pre-wrap' }}>
+            <div style={{ padding: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', color: '#0f172a', minHeight: '40px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
               {formData.handsetAppearance || 'None'}
             </div>
           </div>
           <div>
             <div style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Remarks / Estimated Cost</div>
-            <div style={{ padding: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', color: '#0f172a', minHeight: '40px', whiteSpace: 'pre-wrap' }}>
+            <div style={{ padding: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', color: '#0f172a', minHeight: '40px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
               {formData.remarks || 'None'}
             </div>
           </div>

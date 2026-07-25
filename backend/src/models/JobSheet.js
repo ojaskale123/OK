@@ -28,6 +28,7 @@ const jobSheetSchema = new mongoose.Schema({
   logoUrl: { type: String, default: '' },
   instaQrUrl: { type: String, default: '' },
   googleQrUrl: { type: String, default: '' },
+  imageData: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

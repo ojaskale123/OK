@@ -23,6 +23,27 @@ router.get('/public/:id', async (req, res) => {
     }
 });
 
+// Public endpoint to serve raw PNG image of the job sheet for direct link / WhatsApp preview
+router.get('/image/:id', async (req, res) => {
+    try {
+        const jobSheet = await JobSheet.findById(req.params.id);
+        if (!jobSheet || !jobSheet.imageData) {
+            return res.status(404).send('Job sheet image not found');
+        }
+        const base64Data = jobSheet.imageData.replace(/^data:image\/png;base64,/, '');
+        const imgBuffer = Buffer.from(base64Data, 'base64');
+        res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': imgBuffer.length,
+            'Cache-Control': 'public, max-age=86400'
+        });
+        res.end(imgBuffer);
+    } catch (err) {
+        console.error('Error serving job sheet image:', err);
+        res.status(500).send('Server error loading image');
+    }
+});
+
 // Create / Save Job Sheet (Requires Auth)
 router.post('/', protect, async (req, res) => {
     try {
@@ -33,7 +54,7 @@ router.post('/', protect, async (req, res) => {
             customerName, customerPhone, customerPhone2, customerEmail, customerAddress,
             repairType, repairSenderInfo, productType, productInfo, productImei,
             deviceIssue, checklist, accessories, handsetAppearance, remarks,
-            logoUrl, instaQrUrl, googleQrUrl
+            logoUrl, instaQrUrl, googleQrUrl, imageData
         } = req.body;
 
         if (!customerName || !customerPhone) {
@@ -67,7 +88,8 @@ router.post('/', protect, async (req, res) => {
             remarks: remarks || '',
             logoUrl: logoUrl || req.user.logoUrl || '',
             instaQrUrl: instaQrUrl || req.user.instaQrUrl || '',
-            googleQrUrl: googleQrUrl || req.user.googleQrUrl || ''
+            googleQrUrl: googleQrUrl || req.user.googleQrUrl || '',
+            imageData: imageData || ''
         });
 
         // Log in Action History (ActivityLog)
