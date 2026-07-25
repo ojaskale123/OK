@@ -256,15 +256,25 @@ const JobSheet = () => {
     }
   };
 
-  // Helper renderer for input fields - prevents html2canvas font clipping & guarantees full text display
+  // Helper renderer for input fields - guarantees 38px height & 0 top/bottom padding to prevent font clipping
   const renderInput = (field, placeholder, extraStyle = {}, type = 'text') => {
     const val = formData[field] || '';
+    const styleObj = {
+      height: '38px',
+      padding: '0 10px',
+      lineHeight: '38px',
+      boxSizing: 'border-box',
+      ...extraStyle,
+    };
     return (
       <div className="js-field-wrapper">
         <div
           className="capture-val-display"
           style={{
             display: 'none',
+            height: '38px',
+            padding: '0 10px',
+            lineHeight: '38px',
             fontSize: extraStyle.fontSize || '13px',
             fontWeight: extraStyle.fontWeight || 600,
             color: extraStyle.color || '#0f172a',
@@ -277,7 +287,7 @@ const JobSheet = () => {
         <input
           className="js-input"
           type={type}
-          style={extraStyle}
+          style={styleObj}
           value={val}
           onChange={(e) => updateField(field, e.target.value)}
           placeholder={placeholder}
@@ -286,16 +296,19 @@ const JobSheet = () => {
     );
   };
 
-  // Helper renderer for textarea fields - prevents html2canvas text clipping
+  // Helper renderer for textarea fields - prevents text clipping
   const renderTextarea = (field, placeholder, rows = 2, extraStyle = {}) => {
     const val = formData[field] || '';
+    const minH = Math.max(rows * 24, 60);
     return (
       <div className="js-field-wrapper">
         <div
           className="capture-val-display capture-textarea-display"
           style={{
             display: 'none',
-            minHeight: `${Math.max(rows * 22, 45)}px`,
+            minHeight: `${minH}px`,
+            padding: '8px 10px',
+            lineHeight: '1.6',
             fontSize: extraStyle.fontSize || '13px',
             fontWeight: extraStyle.fontWeight || 600,
             color: extraStyle.color || '#0f172a',
@@ -306,7 +319,7 @@ const JobSheet = () => {
         <textarea
           className="js-textarea"
           rows={rows}
-          style={extraStyle}
+          style={{ minHeight: `${minH}px`, padding: '8px 10px', lineHeight: '1.6', ...extraStyle }}
           value={val}
           onChange={(e) => updateField(field, e.target.value)}
           placeholder={placeholder}
@@ -349,16 +362,16 @@ const JobSheet = () => {
 
         .js-input {
           width: 100%;
+          height: 38px !important;
+          padding: 0 10px !important;
+          line-height: 38px !important;
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 8px 10px;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
-          min-height: 36px;
-          line-height: 1.5;
-          box-sizing: border-box;
+          box-sizing: border-box !important;
           transition: all 0.2s ease;
         }
 
@@ -374,13 +387,13 @@ const JobSheet = () => {
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 8px 10px;
+          padding: 8px 10px !important;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
-          min-height: 60px;
-          line-height: 1.5;
-          box-sizing: border-box;
+          min-height: 60px !important;
+          line-height: 1.6 !important;
+          box-sizing: border-box !important;
           resize: vertical;
           transition: all 0.2s ease;
         }
@@ -402,20 +415,22 @@ const JobSheet = () => {
           display: flex !important;
           align-items: center !important;
           width: 100% !important;
-          min-height: 34px !important;
-          padding: 6px 10px !important;
+          height: 38px !important;
+          padding: 0 10px !important;
+          line-height: 38px !important;
           background: #f8fafc !important;
           border: 1px solid #cbd5e1 !important;
           border-radius: 6px !important;
-          line-height: 1.5 !important;
-          word-break: break-word !important;
-          white-space: pre-wrap !important;
           box-sizing: border-box !important;
           overflow: visible !important;
         }
 
         .capturing-mode .capture-textarea-display {
+          display: block !important;
+          height: auto !important;
           align-items: flex-start !important;
+          padding: 8px 10px !important;
+          line-height: 1.6 !important;
         }
 
         .capturing-mode .no-capture {
@@ -582,7 +597,7 @@ const JobSheet = () => {
               {renderInput('customerName', 'Enter customer name')}
             </div>
             <div>
-              <label style={{ fontSize: '11px', fontWeight: 600, color: '#2563eb' }}>Primary Phone (WhatsApp) *</label>
+              <label style={{ fontSize: '11px', fontWeight 600, color: '#2563eb' }}>Primary Phone (WhatsApp) *</label>
               {renderInput('customerPhone', '10-digit mobile number', { borderColor: '#3b82f6' }, 'tel')}
             </div>
             <div>
