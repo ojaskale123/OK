@@ -256,39 +256,64 @@ const JobSheet = () => {
     }
   };
 
-  // Helper renderer for input fields that prevents html2canvas text clipping
-  const renderInput = (field, placeholder, extraStyle = {}, type = 'text') => (
-    <>
-      <div className="capture-val-display" style={{ display: 'none', ...extraStyle }}>
-        {formData[field] || '-'}
+  // Helper renderer for input fields - prevents html2canvas font clipping & guarantees full text display
+  const renderInput = (field, placeholder, extraStyle = {}, type = 'text') => {
+    const val = formData[field] || '';
+    return (
+      <div className="js-field-wrapper">
+        <div
+          className="capture-val-display"
+          style={{
+            display: 'none',
+            fontSize: extraStyle.fontSize || '13px',
+            fontWeight: extraStyle.fontWeight || 600,
+            color: extraStyle.color || '#0f172a',
+            textAlign: extraStyle.textAlign || 'left',
+            textTransform: extraStyle.textTransform || 'none',
+          }}
+        >
+          {val || placeholder || '-'}
+        </div>
+        <input
+          className="js-input"
+          type={type}
+          style={extraStyle}
+          value={val}
+          onChange={(e) => updateField(field, e.target.value)}
+          placeholder={placeholder}
+        />
       </div>
-      <input
-        className="js-input"
-        type={type}
-        style={extraStyle}
-        value={formData[field]}
-        onChange={(e) => updateField(field, e.target.value)}
-        placeholder={placeholder}
-      />
-    </>
-  );
+    );
+  };
 
-  // Helper renderer for textarea fields that prevents html2canvas text clipping
-  const renderTextarea = (field, placeholder, rows = 2, extraStyle = {}) => (
-    <>
-      <div className="capture-val-display" style={{ display: 'none', minHeight: `${rows * 20}px`, ...extraStyle }}>
-        {formData[field] || '-'}
+  // Helper renderer for textarea fields - prevents html2canvas text clipping
+  const renderTextarea = (field, placeholder, rows = 2, extraStyle = {}) => {
+    const val = formData[field] || '';
+    return (
+      <div className="js-field-wrapper">
+        <div
+          className="capture-val-display capture-textarea-display"
+          style={{
+            display: 'none',
+            minHeight: `${Math.max(rows * 22, 45)}px`,
+            fontSize: extraStyle.fontSize || '13px',
+            fontWeight: extraStyle.fontWeight || 600,
+            color: extraStyle.color || '#0f172a',
+          }}
+        >
+          {val || placeholder || '-'}
+        </div>
+        <textarea
+          className="js-textarea"
+          rows={rows}
+          style={extraStyle}
+          value={val}
+          onChange={(e) => updateField(field, e.target.value)}
+          placeholder={placeholder}
+        />
       </div>
-      <textarea
-        className="js-textarea"
-        rows={rows}
-        style={extraStyle}
-        value={formData[field]}
-        onChange={(e) => updateField(field, e.target.value)}
-        placeholder={placeholder}
-      />
-    </>
-  );
+    );
+  };
 
   return (
     <div className="animate-fade-in job-sheet-page" style={{ padding: '1.5rem', minHeight: '100vh', backgroundColor: 'var(--bg-color, #0f172a)' }}>
@@ -317,15 +342,22 @@ const JobSheet = () => {
           margin-bottom: 8px;
         }
 
+        .js-field-wrapper {
+          width: 100%;
+          box-sizing: border-box;
+        }
+
         .js-input {
           width: 100%;
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 6px 10px;
+          padding: 8px 10px;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
+          min-height: 36px;
+          line-height: 1.5;
           box-sizing: border-box;
           transition: all 0.2s ease;
         }
@@ -342,10 +374,12 @@ const JobSheet = () => {
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 6px;
-          padding: 6px 10px;
+          padding: 8px 10px;
           font-size: 13px;
           color: #0f172a;
           font-weight: 500;
+          min-height: 60px;
+          line-height: 1.5;
           box-sizing: border-box;
           resize: vertical;
           transition: all 0.2s ease;
@@ -358,21 +392,30 @@ const JobSheet = () => {
           box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
         }
 
-        /* HTML2Canvas Clean Capture Mode - Prevents text from cutting in half */
+        /* HTML2Canvas Clean Capture Mode - Guarantees ZERO text clipping vertically or horizontally */
         .capturing-mode .js-input,
         .capturing-mode .js-textarea {
           display: none !important;
         }
 
         .capturing-mode .capture-val-display {
-          display: block !important;
-          color: #000000 !important;
-          font-weight: 600 !important;
+          display: flex !important;
+          align-items: center !important;
+          width: 100% !important;
+          min-height: 34px !important;
+          padding: 6px 10px !important;
+          background: #f8fafc !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 6px !important;
+          line-height: 1.5 !important;
           word-break: break-word !important;
           white-space: pre-wrap !important;
-          line-height: 1.4 !important;
-          padding: 2px 0 !important;
-          font-size: 13px !important;
+          box-sizing: border-box !important;
+          overflow: visible !important;
+        }
+
+        .capturing-mode .capture-textarea-display {
+          align-items: flex-start !important;
         }
 
         .capturing-mode .no-capture {
