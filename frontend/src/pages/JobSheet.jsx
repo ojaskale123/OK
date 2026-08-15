@@ -75,6 +75,7 @@ const JobSheet = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showBrandingOptions, setShowBrandingOptions] = useState(false);
+  const [lastPdfLink, setLastPdfLink] = useState(null);
 
   const previewDate = useMemo(() => new Date(), []);
 
@@ -320,16 +321,18 @@ const JobSheet = () => {
         }
       }
 
+      if (pdfLink) setLastPdfLink(pdfLink);
+
       const text = getWhatsAppText(pdfLink);
 
-      try {
-        await sendReceiptViaWhatsApp({
-          phone: formData.customerPhone,
-          text,
-          filename: pdfFileName,
-          imageLink: pdfLink,
-          preOpenedWindow: whatsappWindow,
-        });
+        try {
+          await sendReceiptViaWhatsApp({
+            phone: formData.customerPhone,
+            text,
+            filename: pdfFileName,
+            imageLink: pdfLink,
+            preOpenedWindow: whatsappWindow,
+          });
         incrementJobCounter();
         setSuccessMessage(`Job sheet sent to customer (${formData.customerPhone}) via WhatsApp.`);
       } catch (err) {
@@ -370,6 +373,7 @@ const JobSheet = () => {
         }
 
         const text = getWhatsAppText(imageLink);
+        if (imageLink) setLastPdfLink(imageLink);
 
         try {
           await sendReceiptViaWhatsApp({ phone: formData.customerPhone, text, filename: imageFileName, imageLink, preOpenedWindow: whatsappWindow });
@@ -886,6 +890,19 @@ const JobSheet = () => {
           </button>
         </div>
       </div>
+
+      {lastPdfLink && (
+        <div style={{ maxWidth: '920px', margin: '1rem auto', padding: '1rem', background: '#f8fafc', borderRadius: '10px', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>Job Sheet Link</div>
+            <div style={{ fontSize: '0.9rem', color: '#475569', overflowWrap: 'anywhere' }}>{lastPdfLink}</div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn btn-secondary" onClick={() => navigator.clipboard.writeText(lastPdfLink)}>Copy Link</button>
+            <a className="btn" href={lastPdfLink} target="_blank" rel="noopener noreferrer" style={{ background: '#2563eb', color: '#fff', padding: '0.55rem 0.9rem', borderRadius: '8px', display: 'inline-flex', alignItems: 'center' }}>Open Link</a>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

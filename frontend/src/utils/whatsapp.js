@@ -67,7 +67,7 @@ export function openWhatsApp(phone, text, preOpenedWindow = null) {
   const waMeUrl = `https://wa.me/${normalized}?text=${encoded}`;
   const appSchemeUrl = `whatsapp://send?phone=${normalized}&text=${encoded}`;
 
-  if (preOpenedWindow && !preOpenedWindow.closed) preOpenedWindow.close();
+  // Do not close the preOpenedWindow here — it should be reused for navigation on desktop.
 
   if (isAndroidDevice()) {
     const intentUrl = `intent://send?phone=${normalized}&text=${encoded}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
