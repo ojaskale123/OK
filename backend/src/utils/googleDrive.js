@@ -33,9 +33,10 @@ const drive = google.drive({ version: 'v3', auth });
  */
 async function uploadBase64ToDrive(base64String, folderId, fileName = 'selfie.png') {
     try {
-        const mimeMatch = base64String.match(/^data:(image\/[^;]+);base64,/i);
-        const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
-        const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+        // Accept any data URI (image/* or application/pdf etc.)
+        const mimeMatch = base64String.match(/^data:([^;]+);base64,/i);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+        const base64Data = base64String.replace(/^data:[^;]+;base64,/, '');
         
         const buffer = Buffer.from(base64Data, 'base64');
         const bufferStream = new stream.PassThrough();

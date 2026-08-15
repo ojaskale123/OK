@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useAuth } from '../context/AuthContext';
-import { normalizeIndianPhone, sendReceiptViaWhatsApp, downloadBlob, uploadImageToDrive } from '../utils/whatsapp';
+import { normalizeIndianPhone, sendReceiptViaWhatsApp, downloadBlob, uploadImageToDrive, isMobileDevice } from '../utils/whatsapp';
 import { Download, Send, ClipboardList, Check, Smartphone, User, Phone, MapPin, Calendar, FileText, Settings, Sparkles, MessageSquare } from 'lucide-react';
 
 const CHECKLIST_ITEMS = [
@@ -233,6 +233,9 @@ const JobSheet = () => {
   const handleDownload = async () => {
     setSuccessMessage('');
     setErrorMessage('');
+    const mobile = isMobileDevice();
+    const whatsappWindow = !mobile ? window.open('about:blank', '_blank') : null;
+
     setIsGenerating(true);
     const blob = await captureJobSheet();
     setIsGenerating(false);
@@ -325,11 +328,13 @@ const JobSheet = () => {
           text,
           filename: pdfFileName,
           imageLink: pdfLink,
+          preOpenedWindow: whatsappWindow,
         });
         incrementJobCounter();
         setSuccessMessage(`Job sheet sent to customer (${formData.customerPhone}) via WhatsApp.`);
       } catch (err) {
         console.error('Failed to open WhatsApp chat', err);
+        if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
         // Fallback: if upload failed entirely, download PDF locally so user can share manually
         downloadBlob(pdfBlob || blob, pdfFileName);
         setErrorMessage('Could not open WhatsApp directly. Job sheet downloaded, please share manually.');
@@ -355,31 +360,33 @@ const JobSheet = () => {
         downloadBlob(blob, `JobSheet_${filenameBase}.png`);
         setErrorMessage('Could not send job sheet. It has been downloaded for manual sharing.');
       }
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  return (
-    <div className="animate-fade-in job-sheet-page" style={{ padding: '1.5rem', minHeight: '100vh', backgroundColor: 'var(--bg-color, #0f172a)', overflow: 'visible' }}>
-      <style>{`
-        .job-sheet-page {
-          overflow: visible;
+      try {
+        const imageFileName = `JobSheet_${filenameBase}.png`;
+        let imageLink = null;
+        try {
+          imageLink = await uploadImageToDrive(blob, imageFileName);
+        } catch (uploadErr) {
+          console.warn('Image upload also failed:', uploadErr);
         }
 
-        .job-sheet-container {
-          background: #ffffff;
-          color: #000000;
-          border-radius: 12px;
-          padding: 24px;
-          max-width: 920px;
-          margin: 0 auto;
-          box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-          font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-          box-sizing: border-box;
-          position: relative;
-          overflow: visible;
-          min-width: 0;
+        const text = getWhatsAppText(imageLink);
+
+        try {
+          await sendReceiptViaWhatsApp({ phone: formData.customerPhone, text, filename: imageFileName, imageLink, preOpenedWindow: whatsappWindow });
+          incrementJobCounter();
+          setSuccessMessage(`Job sheet link sent to customer (${formData.customerPhone}) via WhatsApp.`);
+        } catch (err) {
+          console.error('Fallback send failed', err);
+          if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
+          downloadBlob(blob, `JobSheet_${filenameBase}.png`);
+          setErrorMessage('Could not send job sheet. It has been downloaded for manual sharing.');
+        }
+      } catch (err) {
+        console.error('Fallback send failed', err);
+        if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
+        downloadBlob(blob, `JobSheet_${filenameBase}.png`);
+        setErrorMessage('Could not send job sheet. It has been downloaded for manual sharing.');
+      }
         }
 
         .job-sheet-section-title {
