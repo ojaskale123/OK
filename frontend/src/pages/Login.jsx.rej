@@ -1,0 +1,69 @@
+diff a/frontend/src/pages/Login.jsx b/frontend/src/pages/Login.jsx	(rejected hunks)
+@@ -11,6 +11,7 @@ const Login = () => {
+   const [email, setEmail] = useState(() => localStorage.getItem('ok_last_email') || '');
+   const [password, setPassword] = useState('');
+   const [name, setName] = useState('');
++  const [selectedPlan, setSelectedPlan] = useState('basic');
+   const { login } = useAuth();
+   const [error, setError] = useState('');
+   const [isSubmitting, setIsSubmitting] = useState(false);
+@@ -62,7 +63,7 @@ const Login = () => {
+     setPendingRequest(null);
+ 
+     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+-    const body = isLogin ? { email: email.trim(), password } : { name, email: email.trim(), password };
++    const body = isLogin ? { email: email.trim(), password } : { name, email: email.trim(), password, plan: selectedPlan };
+ 
+     try {
+       const controller = new AbortController();
+@@ -172,6 +173,50 @@ const Login = () => {
+             >
+               {isLogin ? 'Need an account? Sign up' : 'Already have an account? Login'}
+             </div>
++
++            {/* Plan selection & summary for new users */}
++            {!isLogin && (
++              <div style={{ marginTop: '1.25rem', textAlign: 'left' }}>
++                <h4 style={{ marginBottom: '0.5rem' }}>Choose a plan</h4>
++                <p className="text-secondary" style={{ fontSize: '0.9rem', marginBottom: '0.75rem' }}>
++                  Pick a plan that fits your shop. You can change later from your account settings.
++                </p>
++
++                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.65rem' }}>
++                  <label style={{ border: selectedPlan === 'basic' ? '1px solid var(--neon-blue)' : '1px solid #e6eef0', padding: '0.75rem', borderRadius: 8, cursor: 'pointer' }}>
++                    <input type="radio" name="plan" value="basic" checked={selectedPlan === 'basic'} onChange={() => setSelectedPlan('basic')} style={{ marginRight: '0.5rem' }} />
++                    <strong>Basic — ₹3,000 / year</strong>
++                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
++                      Access to: Inventory, Stock selling, History, Profile only. Other features are hidden.
++                    </div>
++                  </label>
++
++                  <label style={{ border: selectedPlan === 'standard' ? '1px solid var(--neon-blue)' : '1px solid #e6eef0', padding: '0.75rem', borderRadius: 8, cursor: 'pointer' }}>
++                    <input type="radio" name="plan" value="standard" checked={selectedPlan === 'standard'} onChange={() => setSelectedPlan('standard')} style={{ marginRight: '0.5rem' }} />
++                    <strong>Standard — ₹5,000 / year</strong>
++                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
++                      All features enabled with limits: up to 500 inventory items and up to 4 workers under main account.
++                    </div>
++                  </label>
++
++                  <label style={{ border: selectedPlan === 'pro' ? '1px solid var(--neon-blue)' : '1px solid #e6eef0', padding: '0.75rem', borderRadius: 8, cursor: 'pointer' }}>
++                    <input type="radio" name="plan" value="pro" checked={selectedPlan === 'pro'} onChange={() => setSelectedPlan('pro')} style={{ marginRight: '0.5rem' }} />
++                    <strong>Pro — ₹8,000 / year</strong>
++                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
++                      All features enabled with unlimited inventory and workers.
++                    </div>
++                  </label>
++
++                  <label style={{ border: selectedPlan === 'enterprise' ? '1px solid var(--neon-blue)' : '1px solid #e6eef0', padding: '0.75rem', borderRadius: 8, cursor: 'pointer' }}>
++                    <input type="radio" name="plan" value="enterprise" checked={selectedPlan === 'enterprise'} onChange={() => setSelectedPlan('enterprise')} style={{ marginRight: '0.5rem' }} />
++                    <strong>Enterprise — ₹15,000 / 5 years</strong>
++                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
++                      Full access for 5 years. All features enabled, unlimited inventory and workers.
++                    </div>
++                  </label>
++                </div>
++              </div>
++            )}
+           </>
+         )}
+       </div>
